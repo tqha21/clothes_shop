@@ -1,64 +1,77 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Clothes Shop (Cửa Hàng Bán Quần Áo)
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Đây là một dự án website thương mại điện tử chuyên cung cấp các sản phẩm thời trang, quần áo. Dự án được xây dựng dựa trên framework mạnh mẽ **Laravel** (PHP), cung cấp giao diện người dùng thân thiện cũng như hệ thống quản trị (Admin Dashboard) toàn diện để quản lý sản phẩm, đơn hàng, khách hàng, nhân viên và các số liệu kinh doanh.
 
-## About Laravel
+## 🚀 Công nghệ sử dụng
+- **Backend:** PHP 8.x, Laravel Framework 9.x
+- **Frontend:** HTML5, CSS3, JavaScript, Bootstrap / Tailwind (hoặc Blade Templates)
+- **Database:** MySQL
+- **Xác thực & Bảo mật:** Laravel Sanctum, Laravel Socialite
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Các tính năng nổi bật
+- **Dành cho Người dùng (Customer):**
+  - Xem danh sách sản phẩm, chi tiết sản phẩm.
+  - Tìm kiếm và lọc sản phẩm theo danh mục.
+  - Thêm sản phẩm vào giỏ hàng, quản lý giỏ hàng.
+  - Thanh toán đơn hàng, xem lịch sử mua hàng.
+  - Đăng ký, đăng nhập (hỗ trợ đăng nhập qua mạng xã hội).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Dành cho Quản trị viên (Admin/Staff):**
+  - Quản lý danh mục, sản phẩm, biến thể (màu sắc, kích thước).
+  - Quản lý đơn hàng, trạng thái thanh toán, và vận chuyển.
+  - Quản lý tài khoản người dùng, nhân viên, khách hàng.
+  - Thống kê doanh thu, báo cáo tồn kho.
+  - Quản lý kho hàng, nhập/xuất kho.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🛠 Hướng dẫn cài đặt
 
-## Learning Laravel
+Để chạy dự án này trên máy local của bạn, vui lòng làm theo các bước sau:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Yêu cầu hệ thống
+- PHP >= 8.0.2
+- Composer
+- Node.js & NPM
+- MySQL
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Cài đặt
+1. **Clone repository về máy:**
+   ```bash
+   git clone https://github.com/tqha21/clothes_shop.git
+   cd shop_quan_ao
+   ```
 
-## Laravel Sponsors
+2. **Cài đặt các gói phụ thuộc PHP (Composer):**
+   ```bash
+   composer install
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+3. **Cài đặt các gói phụ thuộc Frontend (NPM):**
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-### Premium Partners
+4. **Tạo file cấu hình môi trường:**
+   ```bash
+   cp .env.example .env
+   ```
+   *Mở file `.env` và cấu hình thông tin kết nối Database của bạn.*
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+5. **Tạo key ứng dụng:**
+   ```bash
+   php artisan key:generate
+   ```
 
-## Contributing
+6. **Chạy Migration & Seeder (Tạo bảng và dữ liệu mẫu):**
+   ```bash
+   php artisan migrate --seed
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+7. **Chạy server local:**
+   ```bash
+   php artisan serve
+   ```
+   *Truy cập vào ứng dụng qua địa chỉ: `http://localhost:8000`*
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📜 Giấy phép (License)
+Dự án được phân phối dưới dạng mã nguồn mở theo giấy phép [MIT license](https://opensource.org/licenses/MIT).

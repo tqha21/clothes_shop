@@ -179,6 +179,27 @@
                             <p class="text-xs font-semibold text-red-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide">Cửa Hàng Làm Việc</label>
+                        <div class="relative">
+                            <select name="store_id"
+                                    class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all appearance-none cursor-pointer outline-none">
+                                <option value="">-- Chưa Phân Cửa Hàng --</option>
+                                @foreach($stores as $store)
+                                    <option value="{{ $store->id }}" {{ old('store_id') == $store->id ? 'selected' : '' }}>
+                                        {{ $store->name }} ({{ $store->city }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                        @error('store_id')
+                            <p class="text-xs font-semibold text-red-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
         </div>

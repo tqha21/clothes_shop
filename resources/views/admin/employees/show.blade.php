@@ -88,6 +88,16 @@
 
                     <div class="space-y-4">
                         <div class="group/item">
+                            <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5 px-1">Cửa Hàng Làm Việc</p>
+                            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 group-hover/item:border-gray-200 transition-all">
+                                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-gray-500 border border-gray-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-800">{{ $employee->store ? $employee->store->name : 'Chưa Liên Kết Cửa Hàng' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="group/item">
                             <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5 px-1">Ngày Bắt Đầu</p>
                             <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 group-hover/item:border-gray-200 transition-all">
                                 <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-gray-500 border border-gray-200">

@@ -79,6 +79,7 @@
                     <th class="px-6 py-4 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Tài Khoản</th>
                     <th class="px-6 py-4 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Chức Danh</th>
                     <th class="px-6 py-4 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Phòng Ban</th>
+                    <th class="px-6 py-4 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Cửa Hàng</th>
                     <th class="px-6 py-4 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Trạng Thái</th>
                     <th class="px-6 py-4 text-center text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Thao Tác</th>
                 </tr>
@@ -108,6 +109,13 @@
                     </td>
                     <td class="px-6 py-4 font-semibold text-gray-500">
                         {{ $employee->department }}
+                    </td>
+                    <td class="px-6 py-4">
+                        @if($employee->store)
+                            <span class="font-semibold text-gray-800">{{ $employee->store->name }}</span>
+                        @else
+                            <span class="text-xs italic text-gray-400">Chưa liên kết</span>
+                        @endif
                     </td>
                     <td class="px-6 py-4">
                         @if($employee->status == 'active')

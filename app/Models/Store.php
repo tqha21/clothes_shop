@@ -73,4 +73,12 @@ class Store extends Model
         // Simple check - in real app, you'd check against opening_hours
         return $this->status === 'active';
     }
+
+    /**
+     * Get the employees associated with the store.
+     */
+    public function employees()
+    {
+        return $this->hasMany(User::class, 'store_id')->whereIn('role', ['admin', 'manager', 'staff']);
+    }
 }

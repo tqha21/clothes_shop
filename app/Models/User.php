@@ -23,6 +23,7 @@ class User extends Authenticatable
         'phone',
         'password',
         'role',
+        'store_id',
         'employee_code',
         'position',
         'department',
@@ -92,6 +93,14 @@ class User extends Authenticatable
         return $this->salary ? number_format($this->salary, 0, ',', '.') . 'đ' : 'N/A';
     }
 
+
+    /**
+     * Get the store where the employee works.
+     */
+    public function store()
+    {
+        return $this->belongsTo(Store::class);
+    }
 
     /**
      * Get the user's orders.

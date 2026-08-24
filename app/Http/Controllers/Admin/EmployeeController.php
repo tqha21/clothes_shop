@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -26,7 +27,7 @@ class EmployeeController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::employees();
+        $query = User::employees()->with('store');
 
         // Search functionality
         if ($request->has('search') && $request->search) {
@@ -55,7 +56,8 @@ class EmployeeController extends Controller
      */
     public function create()
     {
-        return view('admin.employees.create');
+        $stores = Store::active()->orderBy('name')->get();
+        return view('admin.employees.create', compact('stores'));
     }
 
     /**
@@ -68,6 +70,7 @@ class EmployeeController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:8|confirmed',
+            'store_id' => 'nullable|exists:stores,id',
             'employee_code' => 'required|string|max:20|unique:users,employee_code',
             'position' => 'required|string|max:100',
             'department' => 'required|string|max:100',
@@ -106,7 +109,9 @@ class EmployeeController extends Controller
             abort(404);
         }
 
-        return view('admin.employees.edit', compact('employee'));
+        $stores = Store::active()->orderBy('name')->get();
+
+        return view('admin.employees.edit', compact('employee', 'stores'));
     }
 
     /**
@@ -123,6 +128,7 @@ class EmployeeController extends Controller
             'email' => ['required', 'email', Rule::unique('users')->ignore($employee->id)],
             'phone' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:8|confirmed',
+            'store_id' => 'nullable|exists:stores,id',
             'employee_code' => ['required', 'string', 'max:20', Rule::unique('users')->ignore($employee->id)],
             'position' => 'required|string|max:100',
             'department' => 'required|string|max:100',

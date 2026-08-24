@@ -120,7 +120,17 @@ class EmployeeSeeder extends Seeder
             ],
         ];
 
-        foreach ($employees as $employee) {
+        $stores = \App\Models\Store::pluck('id')->toArray();
+        if (empty($stores)) {
+            // Seed stores if not already seeded
+            $this->call(StoreSeeder::class);
+            $stores = \App\Models\Store::pluck('id')->toArray();
+        }
+
+        foreach ($employees as $index => $employee) {
+            if (!empty($stores)) {
+                $employee['store_id'] = $stores[$index % count($stores)];
+            }
             User::create($employee);
         }
 

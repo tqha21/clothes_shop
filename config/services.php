@@ -31,19 +31,27 @@ return [
     'facebook' => [
         'client_id' => env('FACEBOOK_CLIENT_ID'),
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
-        'redirect' => env('FACEBOOK_REDIRECT_URI', '/auth/facebook/callback'),
+        'redirect' => env('FACEBOOK_REDIRECT_URI', env('APP_URL', 'http://localhost:8000') . '/auth/facebook/callback'),
     ],
 
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', env('APP_URL', 'http://localhost:8000') . '/auth/google/callback'),
     ],
 
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+    ],
+
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'deepseek'),
+        'openai_api_key' => env('OPENAI_API_KEY'),
+        'openai_model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+        'deepseek_api_key' => env('DEEPSEEK_API_KEY'),
+        'deepseek_model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
     ],
 
 ];

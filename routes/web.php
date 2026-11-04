@@ -2,9 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\StoresController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\VoucherController;
@@ -29,6 +31,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/san-pham', [ProductController::class, 'index'])->name('products.index');
 Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('products.show');
 Route::post('/san-pham/{product}/review', [ReviewController::class, 'store'])->name('products.reviews.store');
+Route::post('/chatbot/message', [ChatbotController::class, 'chat'])->name('chatbot.message');
 
 // Blog/Posts Routes
 Route::get('/tin-tuc', [PostController::class, 'index'])->name('posts.index');
@@ -53,6 +56,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/thanh-toan', [CheckoutController::class, 'process'])->name('checkout.process');
     Route::get('/thanh-toan/vnpay-return', [CheckoutController::class, 'vnpayReturn'])->name('checkout.vnpay.return');
     Route::get('/dat-hang-thanh-cong/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+    Route::get('/tai-khoan/don-hang', [CustomerOrderController::class, 'index'])->name('customer.orders.index');
+    Route::get('/tai-khoan/don-hang/{order}', [CustomerOrderController::class, 'show'])->name('customer.orders.show');
+    Route::get('/don-hang/{order}/in-hoa-don', [CustomerOrderController::class, 'printInvoice'])->name('orders.invoice.print');
 });
 
 
@@ -70,7 +76,16 @@ Route::middleware('auth')->group(function () {
 
 
 // Authentication Routes
-Auth::routes();
+Auth::routes(['reset' => false]);
+
+// Quên mật khẩu & Đặt lại mật khẩu bằng mã xác nhận OTP (Gmail)
+Route::get('/password/reset', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showForgotForm'])->name('password.request');
+Route::post('/password/email', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendOtp'])->name('password.email');
+Route::get('/password/verify-code', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showVerifyCodeForm'])->name('password.reset.code');
+Route::get('/password/reset/{token?}', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showVerifyCodeForm'])->name('password.reset');
+Route::post('/password/verify-code', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'verifyCodeAndReset'])->name('password.verify.code');
+Route::post('/password/reset', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'verifyCodeAndReset'])->name('password.update');
+Route::post('/password/resend-otp', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'resendOtp'])->name('password.resend.otp');
 
 // Social Login Routes
 Route::get('/auth/{provider}/redirect', [\App\Http\Controllers\Auth\SocialLoginController::class, 'redirect'])->name('social.redirect');
@@ -94,6 +109,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     
     // Employee Management
     Route::resource('employees', App\Http\Controllers\Admin\EmployeeController::class);
+    
+    // Shift (Ca l?m vi?c) Management
+    Route::resource('shifts', App\Http\Controllers\Admin\ShiftController::class)->except(['show']);
+    
+    // Shift Schedule (L?ch x?p ca) Management
+    Route::get('schedules', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'index'])->name('schedules.index');
+    Route::post('schedules', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'store'])->name('schedules.store');
+    Route::post('schedules/bulk', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'bulkStore'])->name('schedules.bulk');
+    Route::put('schedules/{schedule}', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'update'])->name('schedules.update');
+    Route::delete('schedules/{schedule}', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'destroy'])->name('schedules.destroy');
     
     // Customer Management
     Route::resource('customers', App\Http\Controllers\Admin\CustomerController::class);

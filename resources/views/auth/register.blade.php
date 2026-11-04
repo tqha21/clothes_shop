@@ -33,6 +33,56 @@
                 <p class="mt-2 text-center text-gray-600">Tạo tài khoản mới để mua sắm</p>
             </div>
 
+            @if (session('social_demo_prompt'))
+                @php $prompt = session('social_demo_prompt'); @endphp
+                <div class="mb-6 bg-amber-50 border-l-4 border-amber-500 text-amber-900 p-4 rounded-r-lg text-sm shadow-sm">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-amber-900 text-sm mb-1">
+                                Chưa cấu hình {{ $prompt['name'] }} API trong file .env
+                            </h4>
+                            <p class="text-xs text-amber-800 mb-2 leading-relaxed">
+                                Để đăng ký/đăng nhập tài khoản thực, hãy thêm <code class="bg-amber-100 px-1 py-0.5 rounded font-mono text-[11px]">{{ $prompt['env_key'] }}_CLIENT_ID</code> và <code class="bg-amber-100 px-1 py-0.5 rounded font-mono text-[11px]">{{ $prompt['env_key'] }}_CLIENT_SECRET</code> vào file <code class="bg-amber-100 px-1 py-0.5 rounded font-mono text-[11px]">.env</code>.
+                            </p>
+                            <div class="pt-1">
+                                <a href="{{ $prompt['demo_url'] }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-md shadow-sm transition-all transform hover:scale-105">
+                                    <span>⚡ Thử nghiệm đăng ký/đăng nhập nhanh {{ $prompt['name'] }} (Demo)</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mb-6 bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-r-lg text-sm">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            {{ session('error') }}
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="mb-6 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-r-lg text-sm">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-emerald-500 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            {{ session('success') }}
+                        </div>
+                    </div>
+                </div>
+            @endif
             <form method="POST" action="{{ route('register') }}" class="space-y-5">
                 @csrf
 

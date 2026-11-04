@@ -106,7 +106,9 @@ class CheckoutController extends Controller
             $total = $total - session('discount', 0);
         }
 
-        return view('checkout.index', compact('cart', 'total', 'subtotal', 'membershipDiscount', 'availableCoupons', 'savedCoupons'));
+        $baseShippingFee = ($subtotal >= 500000) ? 0 : 25000;
+
+        return view('checkout.index', compact('cart', 'total', 'subtotal', 'membershipDiscount', 'availableCoupons', 'savedCoupons', 'baseShippingFee'));
     }
 
 
@@ -120,6 +122,7 @@ class CheckoutController extends Controller
             'district_name' => 'nullable|string',
             'ward_name' => 'nullable|string',
             'payment_method' => 'required|in:COD,BANK,EWALLET,VNPAY',
+            'shipping_method' => 'nullable|in:standard,express,economy',
         ]);
 
         $cart = session()->get('cart', []);
@@ -158,9 +161,31 @@ class CheckoutController extends Controller
         $total = $subtotal - $membershipDiscount;
 
         // Apply discount if coupon exists
+        // Xử lý hình thức vận chuyển phong cách Shopee
+        $shippingMethod = $request->input('shipping_method', 'standard');
+        $shippingFee = 25000;
+        $shippingCarrier = 'SPX Express (Shopee Xpress)';
+        $estimatedDelivery = now()->addDays(2)->format('d/m') . ' - ' . now()->addDays(3)->format('d/m/Y');
+
+        if ($shippingMethod === 'express') {
+            $shippingFee = 45000;
+            $shippingCarrier = 'Shopee Xpress Hỏa Tốc (Instant 2-4h)';
+            $estimatedDelivery = 'Hôm nay (' . now()->addHours(3)->format('H:i') . ' - ' . now()->addHours(4)->format('H:i, d/m/Y') . ')';
+        } elseif ($shippingMethod === 'economy') {
+            $shippingFee = 15000;
+            $shippingCarrier = 'Viettel Post / VNPost Tiết Kiệm';
+            $estimatedDelivery = now()->addDays(3)->format('d/m') . ' - ' . now()->addDays(5)->format('d/m/Y');
+        } else {
+            // Standard - Miễn phí vận chuyển Shopee nếu đơn từ 500.000đ
+            if ($subtotal >= 500000) {
+                $shippingFee = 0;
+            }
+        }
+
+        $trackingCode = 'SPX-VN' . date('ymd') . rand(100000, 999999);
         $discount = session()->get('discount', 0);
         $couponId = session()->get('coupon_id');
-        $finalTotal = $total - $discount;
+        $finalTotal = $total - $discount + $shippingFee;
 
         // Build full address
         $fullAddress = $request->customer_address;
@@ -177,6 +202,11 @@ class CheckoutController extends Controller
             'total' => $finalTotal,
             'status' => 'pending',
             'payment_method' => $request->payment_method,
+            'shipping_method' => $shippingMethod,
+            'shipping_carrier' => $shippingCarrier,
+            'shipping_fee' => $shippingFee,
+            'tracking_code' => $trackingCode,
+            'estimated_delivery' => $estimatedDelivery,
         ]);
 
         // Create order items
@@ -233,10 +263,10 @@ class CheckoutController extends Controller
         // Clear cart and coupon session
         session()->forget(['cart', 'coupon_code', 'coupon_id', 'discount']);
 
-        // If VNPAY, redirect to VNPAY payment gateway -> Bypassed per request
-        // if ($request->payment_method === 'VNPAY') {
-        //     return $this->redirectToVnpay($order);
-        // }
+        // If VNPAY, redirect to VNPAY payment gateway
+        if ($request->payment_method === 'VNPAY') {
+            return $this->redirectToVnpay($order);
+        }
 
         return redirect()->route('checkout.success', $order->id);
     }

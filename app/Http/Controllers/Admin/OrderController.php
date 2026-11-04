@@ -110,6 +110,6 @@ class OrderController extends Controller
     public function print(Order $order)
     {
         $order->load(['user', 'items.product']);
-        return view('admin.orders.print', compact('order'));
+        return view('orders.invoice', compact('order'));
     }
 }

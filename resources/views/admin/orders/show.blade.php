@@ -105,6 +105,38 @@
                     </p>
                 </div>
 
+                                <!-- Shipping Info (Shopee Style) -->
+                <div class="bg-orange-50/60 rounded-xl p-5 border border-orange-200/80">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white text-sm">
+                            🚚
+                        </div>
+                        <span class="text-xs font-semibold text-orange-800 uppercase tracking-wide">Vận Chuyển Shopee</span>
+                    </div>
+                    <p class="text-sm font-bold text-gray-900 ml-11">
+                        {{ $order->shipping_carrier ?? 'SPX Express' }}
+                    </p>
+                    <p class="text-xs text-orange-700 ml-11 mt-0.5 font-mono">
+                        Mã VĐ: <strong>{{ $order->formatted_tracking_code }}</strong>
+                    </p>
+                </div>
+
+                <!-- Shipping Fee & Time -->
+                <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 bg-white rounded-lg border border-gray-200 flex items-center justify-center text-gray-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Dự Kiến Giao & Cước</span>
+                    </div>
+                    <p class="text-sm font-bold text-gray-900 ml-11">
+                        {{ $order->estimated_delivery ?? 'Dự kiến 2-3 ngày' }}
+                    </p>
+                    <p class="text-xs text-gray-500 ml-11 mt-0.5">
+                        Phí ship: <strong class="{{ $order->shipping_fee > 0 ? 'text-gray-900' : 'text-emerald-600' }}">{{ $order->shipping_fee > 0 ? number_format($order->shipping_fee) . 'đ' : 'Miễn phí' }}</strong>
+                    </p>
+                </div>
+
                 <!-- Date -->
                 <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
                     <div class="flex items-center gap-3 mb-2">

@@ -445,25 +445,7 @@
 
 </div>
 
-<!-- Floating Chat Buttons -->
-<div class="fixed bottom-8 right-8 z-50 flex flex-col gap-4">
-    <!-- Messenger Button -->
-    <a href="https://m.me/yourpage" target="_blank" class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-600/40 hover:scale-110 hover:-translate-y-1 transition-all group overflow-hidden relative">
-        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-        <svg class="w-7 h-7 relative z-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.908 1.457 5.518 3.732 7.231v3.511c0 .243.218.435.454.382l3.882-1.002a11.107 11.107 0 001.932.169c5.523 0 10-4.145 10-9.258C22 6.145 17.523 2 12 2zm1.061 12.639l-2.548-2.722-4.964 2.722 5.464-5.803 2.613 2.722 4.899-2.722-5.464 5.803z"/></svg>
-    </a>
-    
-    <!-- Zalo Button -->
-    <a href="https://zalo.me/0383390611" target="_blank" class="w-14 h-14 bg-[#0068ff] text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-600/30 hover:scale-110 hover:-translate-y-1 transition-all group overflow-hidden relative">
-        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-        <span class="font-black text-xs relative z-10">ZALO</span>
-    </a>
 
-    <!-- Scroll Top Button -->
-    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-14 h-14 bg-white text-gray-900 rounded-2xl flex items-center justify-center shadow-xl border border-gray-100 hover:bg-gray-50 transition-all opacity-0 pointer-events-none translate-y-10" id="scrollTopBtn">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-    </button>
-</div>
 
 <script>
 // ===== Đổi ảnh theo màu sắc =====
@@ -603,14 +585,7 @@ function addToWishlist(productId) {
     .catch(() => showToast('Có lỗi xảy ra!', 'error'));
 }
 
-window.addEventListener('scroll', function() {
-    const btn = document.getElementById('scrollTopBtn');
-    if (window.pageYOffset > 500) {
-        btn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-10');
-    } else {
-        btn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-10');
-    }
-});
+
 </script>
 
 <style>

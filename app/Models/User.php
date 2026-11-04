@@ -35,6 +35,7 @@ class User extends Authenticatable
         'provider',
         'provider_id',
         'provider_token',
+        'avatar',
     ];
 
     /**
@@ -93,6 +94,14 @@ class User extends Authenticatable
         return $this->salary ? number_format($this->salary, 0, ',', '.') . 'đ' : 'N/A';
     }
 
+    /**
+     * Get user avatar or default avatar.
+     */
+    public function getAvatarUrlAttribute()
+    {
+        return $this->avatar ?: 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=E11D48&color=fff';
+    }
+
 
     /**
      * Get the store where the employee works.
@@ -128,6 +137,14 @@ class User extends Authenticatable
         return $this->hasMany(InventoryLog::class);
     }
 
+
+    /**
+     * Get the user's shift schedules.
+     */
+    public function shiftSchedules()
+    {
+        return $this->hasMany(ShiftSchedule::class);
+    }
     /**
      * Scope a query to only include customers (or users with orders).
      */
@@ -211,3 +228,4 @@ class User extends Authenticatable
         }
     }
 }
+

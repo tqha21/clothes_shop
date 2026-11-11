@@ -17,6 +17,7 @@ class Shift extends Model
         'start_time',
         'end_time',
         'color',
+        'min_staff',
     ];
 
     /**

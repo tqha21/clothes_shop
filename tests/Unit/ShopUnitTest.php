@@ -61,4 +61,41 @@ class ShopUnitTest extends TestCase
         $isValid = preg_match('/^[0-9]{10,11}$/', $phone) === 1;
         $this->assertFalse($isValid);
     }
+
+    /** @test */
+    public function test_shift_conflict_identical_time()
+    {
+        $overlap = \App\Http\Controllers\Admin\ShiftScheduleController::isTimeOverlap('08:00', '12:00', '08:00', '12:00');
+        $this->assertTrue($overlap);
+    }
+
+    /** @test */
+    public function test_shift_conflict_overlapping_time()
+    {
+        $overlap = \App\Http\Controllers\Admin\ShiftScheduleController::isTimeOverlap('06:00', '14:00', '08:00', '12:00');
+        $this->assertTrue($overlap);
+    }
+
+    /** @test */
+    public function test_shift_consecutive_no_conflict()
+    {
+        // Ca 1 kết thúc lúc 14:00, Ca 2 bắt đầu lúc 14:00 -> Không trùng!
+        $overlap = \App\Http\Controllers\Admin\ShiftScheduleController::isTimeOverlap('06:00', '14:00', '14:00', '22:00');
+        $this->assertFalse($overlap);
+    }
+
+    /** @test */
+    public function test_shift_separate_no_conflict()
+    {
+        $overlap = \App\Http\Controllers\Admin\ShiftScheduleController::isTimeOverlap('06:00', '10:00', '14:00', '18:00');
+        $this->assertFalse($overlap);
+    }
+
+    /** @test */
+    public function test_shift_overnight_conflict()
+    {
+        // Ca đêm 22:00 -> 06:00 sáng hôm sau, ca sáng 05:00 -> 09:00 -> Trùng lúc 05:00-06:00
+        $overlap = \App\Http\Controllers\Admin\ShiftScheduleController::isTimeOverlap('22:00', '06:00', '05:00', '09:00');
+        $this->assertTrue($overlap);
+    }
 }

@@ -113,10 +113,15 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     // Shift (Ca l?m vi?c) Management
     Route::resource('shifts', App\Http\Controllers\Admin\ShiftController::class)->except(['show']);
     
-    // Shift Schedule (L?ch x?p ca) Management
+    // Shift Schedule (Lịch xếp ca) Management
     Route::get('schedules', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'index'])->name('schedules.index');
     Route::post('schedules', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'store'])->name('schedules.store');
     Route::post('schedules/bulk', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'bulkStore'])->name('schedules.bulk');
+    Route::post('schedules/copy-week', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'copyWeek'])->name('schedules.copy-week');
+    Route::post('schedules/swap', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'swap'])->name('schedules.swap');
+    Route::post('schedules/check-conflict', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'checkConflict'])->name('schedules.check-conflict');
+    Route::get('schedules/export', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'export'])->name('schedules.export');
+    Route::get('schedules/print', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'print'])->name('schedules.print');
     Route::put('schedules/{schedule}', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'update'])->name('schedules.update');
     Route::delete('schedules/{schedule}', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'destroy'])->name('schedules.destroy');
     

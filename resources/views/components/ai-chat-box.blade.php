@@ -406,8 +406,19 @@
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
 
-        // Links: [Text](url)
-        escaped = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1 ↗</a>');
+        // Links sản phẩm: [Tên sản phẩm](/san-pham/slug) -> Gắn thêm nút "📏 Tư vấn" trực tiếp ngay cạnh tên sản phẩm!
+        escaped = escaped.replace(/\[([^\]]+)\]\((\/san-pham\/[^)]+)\)/g, function(match, productName, productUrl) {
+            const cleanName = productName.replace(/"/g, '&quot;');
+            return '<span class="inline-flex items-center gap-1.5 flex-wrap my-0.5 align-middle">'
+                 + '<a href="' + productUrl + '" target="_blank" class="font-bold text-indigo-600 hover:text-indigo-800 underline">' + productName + ' ↗</a>'
+                 + '<button type="button" class="ai-consult-btn inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold text-purple-700 hover:text-white bg-purple-50 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 border border-purple-200 hover:border-transparent rounded-lg shadow-2xs transition-all cursor-pointer select-none" data-product-name="' + cleanName + '" title="Tư vấn chọn size cho ' + cleanName + '">'
+                 + '<span>📏</span> Tư vấn'
+                 + '</button>'
+                 + '</span>';
+        });
+
+        // Generic Links: [Text](url)
+        escaped = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="font-semibold text-indigo-600 hover:underline">$1 ↗</a>');
 
         // Bold: **text**
         escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');

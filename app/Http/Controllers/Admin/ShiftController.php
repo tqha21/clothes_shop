@@ -27,14 +27,18 @@ class ShiftController extends Controller
             'start_time' => 'required|date_format:H:i',
             'end_time'   => 'required|date_format:H:i',
             'color'      => 'required|string|max:20',
+            'min_staff'  => 'nullable|integer|min:1',
         ], [
             'name.required'       => 'Tên ca là bắt buộc.',
             'start_time.required' => 'Giờ bắt đầu là bắt buộc.',
             'end_time.required'   => 'Giờ kết thúc là bắt buộc.',
             'color.required'      => 'Màu ca là bắt buộc.',
+            'min_staff.min'       => 'Số nhân viên tối thiểu ít nhất là 1.',
         ]);
 
-        Shift::create($request->only(['name', 'start_time', 'end_time', 'color']));
+        $data = $request->only(['name', 'start_time', 'end_time', 'color']);
+        $data['min_staff'] = $request->input('min_staff', 1) ?: 1;
+        Shift::create($data);
 
         return redirect()->route('admin.shifts.index')
                          ->with('success', 'Thêm ca làm việc "' . $request->name . '" thành công!');
@@ -50,14 +54,20 @@ class ShiftController extends Controller
             'start_time' => 'required|date_format:H:i',
             'end_time'   => 'required|date_format:H:i',
             'color'      => 'required|string|max:20',
+            'min_staff'  => 'nullable|integer|min:1',
         ], [
             'name.required'       => 'Tên ca là bắt buộc.',
             'start_time.required' => 'Giờ bắt đầu là bắt buộc.',
             'end_time.required'   => 'Giờ kết thúc là bắt buộc.',
             'color.required'      => 'Màu ca là bắt buộc.',
+            'min_staff.min'       => 'Số nhân viên tối thiểu ít nhất là 1.',
         ]);
 
-        $shift->update($request->only(['name', 'start_time', 'end_time', 'color']));
+        $data = $request->only(['name', 'start_time', 'end_time', 'color']);
+        if ($request->has('min_staff')) {
+            $data['min_staff'] = $request->input('min_staff', 1) ?: 1;
+        }
+        $shift->update($data);
 
         return redirect()->route('admin.shifts.index')
                          ->with('success', 'Cập nhật ca làm việc thành công!');

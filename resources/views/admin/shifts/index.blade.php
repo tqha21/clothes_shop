@@ -44,6 +44,7 @@
                     <th class="px-6 py-3 text-left">Ca Làm Việc</th>
                     <th class="px-6 py-3 text-left">Thời Gian</th>
                     <th class="px-6 py-3 text-left">Màu Sắc</th>
+                    <th class="px-6 py-3 text-left">Nhân Sự Tối Thiểu</th>
                     <th class="px-6 py-3 text-left">Số Lịch Đã Xếp</th>
                     <th class="px-6 py-3 text-right">Thao Tác</th>
                 </tr>
@@ -77,13 +78,19 @@
                         </div>
                     </td>
                     <td class="px-6 py-4">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                            <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            Tối thiểu {{ $shift->min_staff ?? 1 }} người
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
                         <span class="inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold rounded-full bg-blue-50 text-blue-700">
                             {{ $shift->shiftSchedules()->count() }} lịch
                         </span>
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center justify-end gap-2">
-                            <button onclick="openEditModal({{ $shift->id }}, '{{ addslashes($shift->name) }}', '{{ substr($shift->start_time, 0, 5) }}', '{{ substr($shift->end_time, 0, 5) }}', '{{ $shift->color }}')"
+                            <button onclick="openEditModal({{ $shift->id }}, '{{ addslashes($shift->name) }}', '{{ substr($shift->start_time, 0, 5) }}', '{{ substr($shift->end_time, 0, 5) }}', '{{ $shift->color }}', {{ $shift->min_staff ?? 1 }})"
                                 class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Chỉnh sửa">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -156,12 +163,20 @@
                             required>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Màu Hiển Thị <span class="text-red-500">*</span></label>
-                    <div class="flex items-center gap-3">
-                        <input type="color" name="color" value="#3B82F6"
-                            class="w-12 h-10 border border-gray-200 rounded-lg cursor-pointer p-1">
-                        <span class="text-sm text-gray-500">Chọn màu đại diện cho ca trong lịch</span>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Màu Hiển Thị <span class="text-red-500">*</span></label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" name="color" value="#3B82F6"
+                                class="w-12 h-10 border border-gray-200 rounded-lg cursor-pointer p-1">
+                            <span class="text-xs text-gray-500">Màu trên lịch</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nhân sự tối thiểu <span class="text-red-500">*</span></label>
+                        <input type="number" name="min_staff" value="1" min="1" max="50"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all"
+                            required placeholder="VD: 2 người">
                     </div>
                 </div>
                 <div class="flex justify-end gap-3 pt-2">
@@ -214,12 +229,20 @@
                             required>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Màu Hiển Thị <span class="text-red-500">*</span></label>
-                    <div class="flex items-center gap-3">
-                        <input type="color" name="color" id="editColor"
-                            class="w-12 h-10 border border-gray-200 rounded-lg cursor-pointer p-1">
-                        <span class="text-sm text-gray-500">Chọn màu đại diện cho ca trong lịch</span>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Màu Hiển Thị <span class="text-red-500">*</span></label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" name="color" id="editColor"
+                                class="w-12 h-10 border border-gray-200 rounded-lg cursor-pointer p-1">
+                            <span class="text-xs text-gray-500">Màu trên lịch</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nhân sự tối thiểu <span class="text-red-500">*</span></label>
+                        <input type="number" name="min_staff" id="editMinStaff" min="1" max="50"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all"
+                            required>
                     </div>
                 </div>
                 <div class="flex justify-end gap-3 pt-2">
@@ -248,12 +271,13 @@ function closeModal(id) {
     document.getElementById(id).classList.add('hidden');
     document.body.style.overflow = '';
 }
-function openEditModal(id, name, startTime, endTime, color) {
+function openEditModal(id, name, startTime, endTime, color, minStaff) {
     document.getElementById('editForm').action = '/admin/shifts/' + id;
     document.getElementById('editName').value = name;
     document.getElementById('editStartTime').value = startTime;
     document.getElementById('editEndTime').value = endTime;
     document.getElementById('editColor').value = color;
+    document.getElementById('editMinStaff').value = minStaff || 1;
     openModal('editModal');
 }
 document.addEventListener('keydown', function(e) {

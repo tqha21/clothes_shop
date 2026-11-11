@@ -25,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Force HTTPS khi chạy production hoặc APP_URL là https
+        if (config('app.env') === 'production' || str_starts_with(config('app.url', ''), 'https://')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Truyền danh sách danh mục chỉ vào các views của storefront
         View::composer(
             ['layouts.storefront', 'home', 'products.*', 'cart.*', 'checkout.*'],

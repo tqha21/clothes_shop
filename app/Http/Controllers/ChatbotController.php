@@ -335,7 +335,7 @@ class ChatbotController extends Controller
                 $priceText = number_format($p->sale_price ?? $p->price, 0, ',', '.') . 'đ';
                 $reply .= "🔹 [{$p->name}](/san-pham/{$p->slug}) - Giá: **{$priceText}**\n";
             }
-            $reply .= "\n👉 Anh/chị bấm vào sản phẩm bên dưới để xem màu sắc và đặt hàng nhé. Shop có đầy đủ size S, M, L, XL ạ!";
+            $reply .= "\n👉 Anh/chị bấm nút **📏 Tư vấn** bên cạnh từng mẫu để em tư vấn size chuẩn theo chiều cao và cân nặng cho mình nhé! ✨";
 
             return [
                 'reply' => $reply,
@@ -352,7 +352,7 @@ class ChatbotController extends Controller
                 $priceText = number_format($p->sale_price ?? $p->price, 0, ',', '.') . 'đ';
                 $reply .= "🔹 [{$p->name}](/san-pham/{$p->slug}) - Giá: **{$priceText}**\n";
             }
-            $reply .= "\n👉 Các mẫu này mặc đi làm hay dạo phố đều rất thoải mái và tôn dáng!";
+            $reply .= "\n👉 Anh/chị bấm nút **📏 Tư vấn** bên cạnh mẫu áo yêu thích để nhập chiều cao & cân nặng, em sẽ tư vấn size vừa vặn nhất cho mình nha! ✨";
 
             return [
                 'reply' => $reply,
@@ -367,9 +367,9 @@ class ChatbotController extends Controller
             $reply = "Dạ với phong cách công sở lịch sự và chỉn chu, em xin gợi ý cho anh/chị các mẫu sơ mi chống nhăn và vest/blazer cao cấp của shop:\n\n";
             foreach ($workProducts as $p) {
                 $priceText = number_format($p->sale_price ?? $p->price, 0, ',', '.') . 'đ';
-                $reply .= "👔 [{$p->name}](/san-pham/{$p->slug}) - **{$priceText}**\n";
+                $reply .= "👔 [{$p->name}](/san-pham/{$p->slug}) - Giá: **{$priceText}**\n";
             }
-            $reply .= "\n👉 Vải mềm mịn, dễ ủi và giữ form chuẩn cả ngày làm việc ạ!";
+            $reply .= "\n👉 Anh/chị bấm nút **📏 Tư vấn** bên cạnh từng mẫu để em chọn size chuẩn phom công sở cho mình nhé!";
 
             return [
                 'reply' => $reply,
@@ -396,7 +396,7 @@ class ChatbotController extends Controller
                         $priceText = number_format($p->sale_price ?? $p->price, 0, ',', '.') . 'đ';
                         $reply .= "🔹 [{$p->name}](/san-pham/{$p->slug}) - Giá chỉ: **{$priceText}**\n";
                     }
-                    $reply .= "\n👉 Anh/chị xem chi tiết các mẫu bên dưới nhé, cần tư vấn size số thì nhắn em ngay!";
+                    $reply .= "\n👉 Anh/chị bấm nút **📏 Tư vấn** bên cạnh mẫu áo để em đo size chuẩn nhất theo chiều cao, cân nặng nhé! ✨";
 
                     return [
                         'reply' => $reply,
@@ -556,6 +556,17 @@ class ChatbotController extends Controller
             if (mb_strlen($candidate) >= 3) {
                 $p = Product::where('name', 'like', "%{$candidate}%")->first();
                 if ($p) return $p;
+
+                // Thử tìm theo từng từ khóa quan trọng nếu tên dài
+                $words = array_filter(explode(' ', $candidate), fn($w) => mb_strlen($w) >= 3);
+                if (!empty($words)) {
+                    $p = Product::where(function($q) use ($words) {
+                        foreach ($words as $w) {
+                            $q->where('name', 'like', "%{$w}%");
+                        }
+                    })->first();
+                    if ($p) return $p;
+                }
             }
         }
 

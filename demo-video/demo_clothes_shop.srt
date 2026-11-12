@@ -1,115 +1,111 @@
 1
-00:00:03,676 --> 00:00:09,676
-Giới thiệu hệ thống quản lý và bán hàng thời trang Clothes Shop.
+00:00:02,816 --> 00:00:06,816
+[TRANG CHỦ] Chào mừng đến với hệ thống quản lý & bán hàng thời trang Clothes Shop.
 
 2
-00:00:09,297 --> 00:00:14,297
-Giao diện trang chủ hiện đại với banner khuyến mãi và các bộ sưu tập thời trang.
+00:00:08,578 --> 00:00:12,578
+[BỘ SƯU TẬP] Giao diện hiện đại với banner khuyến mãi, bộ sưu tập theo mùa và sản phẩm mới.
 
 3
-00:00:13,023 --> 00:00:18,024
-Hiển thị các sản phẩm mới nhất, sản phẩm bán chạy và danh mục nổi bật.
+00:00:11,482 --> 00:00:15,482
+[SẢN PHẨM NỔI BẬT] Trưng bày đa dạng mặt hàng thời trang nam, nữ với đầy đủ thông tin giá và đánh giá.
 
 4
-00:00:19,803 --> 00:00:25,803
-Khách hàng có thể tìm kiếm, lựa chọn và đặt mua sản phẩm trực tuyến.
+00:00:16,603 --> 00:00:20,603
+[MUA SẮM ONLINE] Khách hàng có thể tìm kiếm, lọc theo danh mục và xem chi tiết sản phẩm.
 
 5
-00:00:22,318 --> 00:00:27,318
-Tìm kiếm sản phẩm theo tên hoặc từ khóa trên thanh công cụ.
+00:00:20,676 --> 00:00:23,676
+[TÌM KIẾM] Tìm kiếm sản phẩm nhanh theo tên trên thanh công cụ.
 
 6
-00:00:22,362 --> 00:00:28,362
-Xem chi tiết sản phẩm thời trang, thuộc tính kích thước, màu sắc và tồn kho.
+00:00:23,786 --> 00:00:27,786
+[CHI TIẾT HÀNG HÓA] Xem chi tiết sản phẩm, chất liệu, màu sắc, kích thước và tồn kho khả dụng.
 
 7
-00:00:22,375 --> 00:00:27,375
-Lựa chọn kích cỡ, màu sắc phù hợp và thêm sản phẩm vào giỏ hàng.
+00:00:27,169 --> 00:00:31,169
+[CHỌN BIẾN THỂ] Lựa chọn kích cỡ, màu sắc phù hợp và thêm sản phẩm vào giỏ hàng trực tuyến.
 
 8
-00:00:24,321 --> 00:00:29,321
-Mở giỏ hàng, cập nhật số lượng và kiểm tra tổng tiền trước khi đặt hàng.
+00:00:31,248 --> 00:00:35,248
+[GIỎ HÀNG] Kiểm tra giỏ hàng, cập nhật số lượng, áp dụng mã voucher giảm giá.
 
 9
-00:00:27,469 --> 00:00:33,469
-Tiến hành đặt hàng và điền thông tin người nhận thử nghiệm.
+00:00:34,716 --> 00:00:38,716
+[XÁC THỰC QUẢN TRỊ] Đăng nhập tài khoản quản trị hệ thống Clothes Shop an toàn & bảo mật.
 
 10
-00:00:31,309 --> 00:00:36,308
-Xác nhận đặt hàng: hệ thống tự động trừ kho khả dụng và sinh mã đơn hàng.
+00:00:40,862 --> 00:00:44,862
+[DASHBOARD QUẢN TRỊ] Trung tâm điều hành: tổng quan doanh số, đơn hàng, khách hàng và biến động kho.
 
 11
-00:00:31,320 --> 00:00:37,320
-Quản trị viên đăng nhập vào hệ thống để quản lý danh mục và sản phẩm.
+00:00:46,179 --> 00:00:50,179
+[QUẢN LÝ DANH MỤC] Quản lý cây danh mục sản phẩm thời trang: áo, quần, váy, phụ kiện đa tầng.
 
 12
-00:01:07,835 --> 00:01:12,835
-Quản trị viên quản lý danh mục sản phẩm thời trang tập trung.
+00:00:49,789 --> 00:00:53,789
+[QUẢN LÝ SẢN PHẨM] Danh sách sản phẩm với giá bán, tồn kho tổng thể và trạng thái kinh doanh.
 
 13
-00:01:11,474 --> 00:01:17,474
-Hiển thị danh sách sản phẩm, giá bán, tồn kho tổng và trạng thái kinh doanh.
+00:00:55,692 --> 00:00:59,692
+[KHO ĐA CỬA HÀNG] Theo dõi số lượng tồn kho theo thời gian thực trên toàn bộ 6 chi nhánh.
 
 14
-00:01:16,236 --> 00:01:22,236
-Hệ thống hỗ trợ theo dõi số lượng tồn kho đa cửa hàng và điều chuyển hàng hóa.
+00:01:02,258 --> 00:01:06,258
+[NHẬT KÝ BIẾN ĐỘNG KHO] Ghi nhận chi tiết mọi giao dịch nhập kho, xuất kho, bán hàng và điều chuyển.
 
 15
-00:01:23,227 --> 00:01:28,227
-Nhật ký kho ghi nhận đầy đủ biến động nhập, xuất, bán hàng và điều chỉnh.
+00:01:05,955 --> 00:01:09,955
+[QUẢN LÝ ĐƠN HÀNG] Đơn hàng được quản lý tập trung đa kênh với trạng thái xử lý rõ ràng.
 
 16
-00:01:28,346 --> 00:01:34,346
-Đơn hàng được quản lý tập trung với trạng thái xử lý rõ ràng.
+00:01:11,372 --> 00:01:15,372
+[CHI TIẾT ĐƠN HÀNG] Xem thông tin khách hàng, địa chỉ nhận, danh sách sản phẩm và thanh toán.
 
 17
-00:01:34,620 --> 00:01:40,620
-Xem chi tiết đơn hàng, thông tin khách hàng, sản phẩm và phương thức thanh toán.
+00:01:16,288 --> 00:01:20,288
+[BÁN HÀNG POS] Giao diện thu ngân POS tối ưu hóa cho màn hình cảm ứng, quét mã vạch và phím tắt.
 
 18
-00:01:42,179 --> 00:01:48,179
-Nhân viên sử dụng hệ thống POS để thực hiện giao dịch bán hàng trực tiếp tại quầy.
+00:01:19,503 --> 00:01:23,503
+[CHỌN MẶT HÀNG] Bấm chọn sản phẩm hoặc quét mã vạch Barcode để thêm tức thì vào giỏ hóa đơn.
 
 19
-00:01:47,686 --> 00:01:53,686
-Thu ngân mở ca làm việc trực tiếp ngay tại quầy POS với số tiền két ban đầu.
+00:01:52,862 --> 00:01:56,862
+[KHÁCH HÀNG THÂN THIẾT] Nhập số điện thoại khách hàng để tích điểm thành viên và tự động chiết khấu VIP.
 
 20
-00:01:54,489 --> 00:02:00,489
-Thu ngân tìm kiếm sản phẩm hoặc quét mã vạch để thêm nhanh vào hóa đơn.
+00:01:54,798 --> 00:01:58,798
+[TÍNH TIỀN THỐI] Máy tự động tính tiền thối lại khách hàng ngay khi thu ngân nhận tiền mặt.
 
 21
-00:02:27,751 --> 00:02:32,751
-Nhập số điện thoại khách hàng để tự động tích điểm và áp dụng chiết khấu VIP.
+00:01:56,007 --> 00:02:00,007
+[HOÀN TẤT ĐƠN HÀNG] Thanh toán thành công: hệ thống tự động trừ tồn kho chi nhánh và sẵn sàng in hóa đơn nhiệt K80.
 
 22
-00:02:30,205 --> 00:02:35,205
-Máy tự động tính tiền thối lại khách khi thu ngân nhập số tiền mặt nhận được.
+00:02:28,047 --> 00:02:32,047
+[QUẢN LÝ NHÂN SỰ] Hệ thống quản lý hồ sơ nhân viên, chức vụ, chi nhánh và phân quyền bảo mật.
 
 23
-00:02:31,713 --> 00:02:37,713
-Hoàn tất giao dịch: hệ thống tự động trừ kho chi nhánh và sẵn sàng in hóa đơn nhiệt K80.
+00:02:31,573 --> 00:02:35,573
+[XẾP LỊCH CA TUẦN] Giao diện trực quan xếp ca làm việc sáng - chiều - tối theo tuần cho từng chi nhánh.
 
 24
-00:03:04,739 --> 00:03:10,739
-Hệ thống hỗ trợ quản lý nhân viên, xếp ca làm việc và theo dõi chấm công.
+00:02:38,160 --> 00:02:42,160
+[CHẤM CÔNG & ĐỐI SOÁT TIỀN] Nhân viên theo dõi ca làm việc, chấm công và đối soát tiền bàn giao minh bạch.
 
 25
-00:03:09,649 --> 00:03:15,649
-Giao diện xếp lịch ca làm việc theo tuần cho nhân viên các chi nhánh.
+00:02:42,102 --> 00:02:46,102
+[BÁO CÁO DOANH SỐ] Báo cáo doanh số đa kênh: thống kê doanh thu thuần, số lượng đơn hàng và giá trị trung bình.
 
 26
-00:03:18,247 --> 00:03:24,247
-Nhân viên theo dõi chấm công, đối soát tiền két và bàn giao ca minh bạch.
+00:02:45,009 --> 00:02:49,009
+[TỶ TRỌNG ONLINE & POS] Biểu đồ so sánh trực quan tỷ trọng doanh thu giữa kênh Online và bán tại quầy POS.
 
 27
-00:03:23,781 --> 00:03:29,781
-Dashboard báo cáo doanh số đa kênh cung cấp thông tin tổng quan về hoạt động kinh doanh.
+00:02:48,253 --> 00:02:52,253
+[XẾP HẠNG DOANH SỐ] Theo dõi năng suất bán hàng theo từng nhân viên và từng cửa hàng trong hệ thống.
 
 28
-00:03:27,573 --> 00:03:33,573
-Hiển thị doanh thu thuần, phân bổ tỷ trọng Online vs POS và xếp hạng năng suất nhân viên.
-
-29
-00:03:35,770 --> 00:03:41,770
-Clothes Shop – Hệ thống hỗ trợ quản lý bán hàng và vận hành cửa hàng thời trang.
+00:02:53,692 --> 00:02:58,692
+[TỔNG KẾT HỆ THỐNG] Clothes Shop – Giải pháp bán hàng và quản trị thời trang Omnichannel toàn diện, ổn định & hiện đại.

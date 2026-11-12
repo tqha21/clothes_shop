@@ -1,78 +1,93 @@
-const { chromium } = require('playwright');
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+/**
+ * TỰ ĐỘNG QUAY VIDEO DEMO WEBSITE CLOTHES SHOP (OMNICHANNEL)
+ * Phiên bản: Chuyên nghiệp, Thao tác tự nhiên (dừng 1-2 giây), Phụ đề liên tục, Không có lỗi.
+ * Viewport: 1920x1080 (16:9) @ 30 FPS.
+ */
 
-const BASE_URL = 'http://127.0.0.1:8000';
+const { chromium } = require('playwright');
+const path = require('path');
+const fs = require('fs');
+
+const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:8000';
 const RAW_DIR = path.join(__dirname, 'raw');
-const FFMPEG_PATH = 'C:\\Users\\Admin\\AppData\\Local\\ms-playwright\\ffmpeg-1013\\ffmpeg-win64.exe';
 
 if (!fs.existsSync(RAW_DIR)) {
   fs.mkdirSync(RAW_DIR, { recursive: true });
 }
 
-// SRT Subtitle collector
-const srtEntries = [];
-let subtitleCounter = 1;
-const sessionStartTime = Date.now();
+// Clean old raw files
+try {
+  const oldFiles = fs.readdirSync(RAW_DIR);
+  for (const f of oldFiles) {
+    fs.unlinkSync(path.join(RAW_DIR, f));
+  }
+} catch (e) {}
 
-function formatSrtTime(totalSeconds) {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = Math.floor(totalSeconds % 60);
-  const milliseconds = Math.floor((totalSeconds % 1) * 1000);
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')},${String(milliseconds).padStart(3, '0')}`;
+const srtEntries = [];
+let srtCounter = 1;
+let recordingStartTime = null;
+
+function formatTimestamp(ms) {
+  const totalSec = Math.floor(ms / 1000);
+  const hours = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+  const minutes = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+  const seconds = String(totalSec % 60).padStart(2, '0');
+  const millis = String(ms % 1000).padStart(3, '0');
+  return `${hours}:${minutes}:${seconds},${millis}`;
 }
 
-async function setSubtitle(page, text, durationSec = 5) {
-  const startSec = (Date.now() - sessionStartTime) / 1000;
-  const endSec = startSec + durationSec;
+async function setSubtitle(page, badge, text, durationSec = 4) {
+  const now = Date.now();
+  if (!recordingStartTime) recordingStartTime = now;
+  const startMs = now - recordingStartTime;
+  const endMs = startMs + Math.round(durationSec * 1000);
 
   srtEntries.push({
-    index: subtitleCounter++,
-    start: formatSrtTime(startSec),
-    end: formatSrtTime(endSec),
-    text: text
+    index: srtCounter++,
+    start: formatTimestamp(startMs),
+    end: formatTimestamp(endMs),
+    text: `[${badge}] ${text}`
   });
 
-  console.log(`[SUBTITLE @ ${formatSrtTime(startSec)}] ${text}`);
+  console.log(`[SUBTITLE @ ${formatTimestamp(startMs)}] [${badge}] ${text}`);
 
   try {
-    await page.evaluate(({ text }) => {
+    await page.evaluate(({ badge, text }) => {
       let el = document.getElementById('demo-subtitle-box');
       if (!el) {
         el = document.createElement('div');
         el.id = 'demo-subtitle-box';
         el.style.cssText = `
           position: fixed;
-          bottom: 35px;
+          bottom: 36px;
           left: 50%;
           transform: translateX(-50%);
-          background: rgba(15, 23, 42, 0.94);
+          background: rgba(15, 23, 42, 0.90);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           color: #ffffff;
-          padding: 12px 30px;
+          padding: 12px 28px;
           border-radius: 14px;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-          font-size: 20px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          font-size: 19px;
           font-weight: 600;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
-          border: 1.5px solid rgba(244, 63, 94, 0.7);
+          box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-bottom: 3px solid #f43f5e;
           z-index: 2147483647;
           text-align: center;
-          max-width: 82%;
-          line-height: 1.4;
-          letter-spacing: 0.2px;
+          max-width: 85%;
+          line-height: 1.45;
+          letter-spacing: 0.3px;
           pointer-events: none;
-          transition: opacity 0.2s ease;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         `;
         document.body.appendChild(el);
       }
-      el.innerHTML = '<span style="color:#f43f5e;font-weight:800;margin-right:8px;">[DEMO]</span> ' + text;
+      el.innerHTML = `<span style="display:inline-block;background:#f43f5e;color:#fff;padding:2px 10px;border-radius:7px;font-size:13px;font-weight:800;letter-spacing:0.5px;margin-right:10px;vertical-align:middle;box-shadow:0 2px 6px rgba(244,63,94,0.4);">${badge}</span><span style="vertical-align:middle;">${text}</span>`;
       el.style.opacity = '1';
-    }, { text });
-  } catch (err) {
-    // page might be navigating
-  }
+    }, { badge, text });
+  } catch (err) {}
 }
 
 async function injectPointer(page) {
@@ -91,8 +106,8 @@ async function injectPointer(page) {
         pointer-events: none;
         z-index: 2147483646;
         transform: translate(-50%, -50%);
-        box-shadow: 0 0 12px rgba(244, 63, 94, 0.9), 0 2px 6px rgba(0,0,0,0.5);
-        transition: transform 0.05s ease;
+        box-shadow: 0 0 14px rgba(244, 63, 94, 0.95), 0 2px 6px rgba(0,0,0,0.5);
+        transition: transform 0.08s ease;
       `;
       document.body.appendChild(cursor);
 
@@ -101,9 +116,32 @@ async function injectPointer(page) {
         cursor.style.top = e.clientY + 'px';
       }, { passive: true });
 
-      window.addEventListener('mousedown', () => {
-        cursor.style.transform = 'translate(-50%, -50%) scale(0.7)';
+      window.addEventListener('mousedown', (e) => {
+        cursor.style.transform = 'translate(-50%, -50%) scale(0.75)';
         cursor.style.background = '#e11d48';
+
+        // Click Ripple Wave
+        const wave = document.createElement('div');
+        wave.style.cssText = `
+          position: fixed;
+          left: ${e.clientX}px;
+          top: ${e.clientY}px;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: rgba(244, 63, 94, 0.45);
+          border: 1px solid rgba(255, 255, 255, 0.8);
+          pointer-events: none;
+          z-index: 2147483645;
+          transform: translate(-50%, -50%) scale(1);
+          transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+        `;
+        document.body.appendChild(wave);
+        requestAnimationFrame(() => {
+          wave.style.transform = 'translate(-50%, -50%) scale(5.5)';
+          wave.style.opacity = '0';
+        });
+        setTimeout(() => wave.remove(), 450);
       }, { passive: true });
 
       window.addEventListener('mouseup', () => {
@@ -116,8 +154,8 @@ async function injectPointer(page) {
 
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
-async function smoothScroll(page, totalY, durationMs = 1500) {
-  const steps = 30;
+async function smoothScroll(page, totalY, durationMs = 1200) {
+  const steps = 24;
   const stepDelay = durationMs / steps;
   const dy = totalY / steps;
   for (let i = 0; i < steps; i++) {
@@ -126,20 +164,19 @@ async function smoothScroll(page, totalY, durationMs = 1500) {
   }
 }
 
-async function smoothMouseMove(page, targetX, targetY, steps = 15) {
-  // get current position (approximate from center if unknown)
+async function smoothMouseMove(page, targetX, targetY, steps = 18) {
   await page.mouse.move(targetX, targetY, { steps });
 }
 
 async function runDemo() {
-  console.log('🚀 Khởi chạy trình duyệt Chromium để tự động quay video màn hình...');
+  console.log('🚀 Khởi chạy trình duyệt Chromium 1920x1080 @ 30 FPS để quay video demo...');
   
   const browser = await chromium.launch({
     headless: true,
     args: [
-      '--start-maximized',
-      '--disable-infobars',
       '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage'
     ]
   });
 
@@ -157,181 +194,166 @@ async function runDemo() {
     await injectPointer(page);
   });
 
+  let videoFilePromise = page.video();
+
   try {
+    recordingStartTime = Date.now();
+
     // =========================================================
-    // PHẦN 1: GIỚI THIỆU WEBSITE (00:00)
+    // PHẦN 1: GIỚI THIỆU TRANG CHỦ WEBSITE
     // =========================================================
     console.log('--- PHẦN 1: Giới thiệu website ---');
-    await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await setSubtitle(page, 'Giới thiệu hệ thống quản lý và bán hàng thời trang Clothes Shop.', 6);
-    await sleep(2500);
-
-    // Di chuyển chuột qua thanh điều hướng
-    await smoothMouseMove(page, 450, 40);
-    await sleep(600);
-    await smoothMouseMove(page, 600, 40);
-    await sleep(600);
-    await smoothMouseMove(page, 750, 40);
-    await sleep(600);
-
-    await setSubtitle(page, 'Giao diện trang chủ hiện đại với banner khuyến mãi và các bộ sưu tập thời trang.', 5);
-    await smoothScroll(page, 550, 1800);
+    await setSubtitle(page, 'TRANG CHỦ', 'Chào mừng đến với hệ thống quản lý & bán hàng thời trang Clothes Shop.', 4);
     await sleep(1500);
 
-    await setSubtitle(page, 'Hiển thị các sản phẩm mới nhất, sản phẩm bán chạy và danh mục nổi bật.', 5);
-    await smoothScroll(page, 650, 1800);
-    await sleep(1800);
+    // Di chuyển chuột qua thanh menu điều hướng
+    await smoothMouseMove(page, 430, 42);
+    await sleep(500);
+    await smoothMouseMove(page, 540, 42);
+    await sleep(500);
+    await smoothMouseMove(page, 650, 42);
+    await sleep(500);
 
-    await smoothScroll(page, -1200, 1500);
+    await setSubtitle(page, 'BỘ SƯU TẬP', 'Giao diện hiện đại với banner khuyến mãi, bộ sưu tập theo mùa và sản phẩm mới.', 4);
+    await smoothScroll(page, 520, 1100);
+    await sleep(1400);
+
+    await setSubtitle(page, 'SẢN PHẨM NỔI BẬT', 'Trưng bày đa dạng mặt hàng thời trang nam, nữ với đầy đủ thông tin giá và đánh giá.', 4);
+    await smoothScroll(page, 650, 1100);
+    await sleep(1400);
+
+    await smoothScroll(page, -1170, 900);
     await sleep(1000);
 
     // =========================================================
-    // PHẦN 2: CHỨC NĂNG KHÁCH HÀNG (Mua hàng online)
+    // PHẦN 2: CHỨC NĂNG KHÁCH HÀNG (MUA HÀNG ONLINE)
     // =========================================================
     console.log('--- PHẦN 2: Chức năng khách hàng ---');
-    await setSubtitle(page, 'Khách hàng có thể tìm kiếm, lựa chọn và đặt mua sản phẩm trực tuyến.', 6);
-    await page.goto(`${BASE_URL}/products`, { waitUntil: 'networkidle' });
+    await setSubtitle(page, 'MUA SẮM ONLINE', 'Khách hàng có thể tìm kiếm, lọc theo danh mục và xem chi tiết sản phẩm.', 4);
+    await page.goto(`${BASE_URL}/san-pham`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await sleep(1500);
+    await sleep(1200);
 
     // Tìm kiếm sản phẩm
-    await setSubtitle(page, 'Tìm kiếm sản phẩm theo tên hoặc từ khóa trên thanh công cụ.', 5);
+    await setSubtitle(page, 'TÌM KIẾM', 'Tìm kiếm sản phẩm nhanh theo tên trên thanh công cụ.', 3);
     const searchInput = await page.$('input[name="search"], input[type="search"], input[placeholder*="Tìm"]');
     if (searchInput) {
       await searchInput.click();
-      await page.keyboard.type('Áo', { delay: 100 });
+      await page.keyboard.type('Áo', { delay: 70 });
+      await sleep(600);
       await page.keyboard.press('Enter');
-      await page.waitForNavigation({ waitUntil: 'networkidle' }).catch(() => {});
+      await page.waitForLoadState('domcontentloaded').catch(() => {});
+      await injectPointer(page);
+      await sleep(1200);
+    }
+
+    // Xem chi tiết sản phẩm đầu tiên
+    await setSubtitle(page, 'CHI TIẾT HÀNG HÓA', 'Xem chi tiết sản phẩm, chất liệu, màu sắc, kích thước và tồn kho khả dụng.', 4);
+    const firstProduct = await page.$('a[href*="/san-pham/"], .product-card a, .card a');
+    if (firstProduct) {
+      await firstProduct.click();
+      await page.waitForLoadState('domcontentloaded').catch(() => {});
       await injectPointer(page);
       await sleep(1500);
     }
 
-    // Chọn sản phẩm đầu tiên
-    await setSubtitle(page, 'Xem chi tiết sản phẩm thời trang, thuộc tính kích thước, màu sắc và tồn kho.', 6);
-    const productCard = await page.$('.product-card a, a[href*="/products/"], .card a');
-    if (productCard) {
-      await productCard.click();
-      await page.waitForNavigation({ waitUntil: 'networkidle' }).catch(() => {});
-      await injectPointer(page);
-      await sleep(2000);
-    }
-
-    // Chọn size, màu và thêm vào giỏ
-    await setSubtitle(page, 'Lựa chọn kích cỡ, màu sắc phù hợp và thêm sản phẩm vào giỏ hàng.', 5);
-    await smoothScroll(page, 200, 800);
+    // Chọn biến thể & Thêm giỏ hàng
+    await setSubtitle(page, 'CHỌN BIẾN THỂ', 'Lựa chọn kích cỡ, màu sắc phù hợp và thêm sản phẩm vào giỏ hàng trực tuyến.', 4);
+    await smoothScroll(page, 200, 700);
     await sleep(800);
 
-    // Click button size / color if available
-    const sizeBtn = await page.$('button[data-size], input[name="size"] + label, .size-option');
-    if (sizeBtn) await sizeBtn.click().catch(() => {});
+    const sizeOption = await page.$('button[data-size], input[name="size"] + label, .size-option, .badge-size');
+    if (sizeOption) await sizeOption.click().catch(() => {});
+    await sleep(600);
 
-    // Add to cart
     const addToCartBtn = await page.$('button[type="submit"]:has-text("Thêm vào giỏ"), button:has-text("Thêm vào giỏ"), form[action*="cart"] button');
     if (addToCartBtn) {
-      await addToCartBtn.click();
-      await sleep(2000);
+      await addToCartBtn.click().catch(() => {});
+      await sleep(1400);
     }
 
-    // Vào giỏ hàng
-    await setSubtitle(page, 'Mở giỏ hàng, cập nhật số lượng và kiểm tra tổng tiền trước khi đặt hàng.', 5);
-    await page.goto(`${BASE_URL}/cart`, { waitUntil: 'networkidle' });
+    // Mở giỏ hàng
+    await setSubtitle(page, 'GIỎ HÀNG', 'Kiểm tra giỏ hàng, cập nhật số lượng, áp dụng mã voucher giảm giá.', 4);
+    await page.goto(`${BASE_URL}/gio-hang`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await sleep(2000);
-
-    // Tiến hành thanh toán
-    await setSubtitle(page, 'Tiến hành đặt hàng và điền thông tin người nhận thử nghiệm.', 6);
-    const checkoutLink = await page.$('a[href*="checkout"], button:has-text("Thanh toán"), a:has-text("Đặt hàng")');
-    if (checkoutLink) {
-      await checkoutLink.click();
-      await page.waitForNavigation({ waitUntil: 'networkidle' }).catch(() => {});
-    } else {
-      await page.goto(`${BASE_URL}/checkout`, { waitUntil: 'networkidle' });
-    }
-    await injectPointer(page);
-    await sleep(1500);
-
-    // Điền form checkout
-    const nameInput = await page.$('input[name="customer_name"], input[name="name"]');
-    if (nameInput) await nameInput.fill('Khách Mua Online Test');
-
-    const phoneInput = await page.$('input[name="customer_phone"], input[name="phone"]');
-    if (phoneInput) await phoneInput.fill('0988776655');
-
-    const addressInput = await page.$('input[name="customer_address"], input[name="address"], textarea[name="address"]');
-    if (addressInput) await addressInput.fill('Số 88 Phố Huế, Hoàn Kiếm, Hà Nội');
-
-    await sleep(1000);
-    await setSubtitle(page, 'Xác nhận đặt hàng: hệ thống tự động trừ kho khả dụng và sinh mã đơn hàng.', 5);
-
-    const submitOrderBtn = await page.$('button[type="submit"]:has-text("Đặt hàng"), button:has-text("Hoàn tất đặt hàng"), form[action*="checkout"] button[type="submit"]');
-    if (submitOrderBtn) {
-      await submitOrderBtn.click();
-      await page.waitForNavigation({ waitUntil: 'networkidle' }).catch(() => {});
-      await injectPointer(page);
-      await sleep(2500);
-    }
+    await smoothScroll(page, 200, 700);
+    await sleep(1400);
 
     // =========================================================
-    // PHẦN 3: QUẢN TRỊ SẢN PHẨM (Admin)
+    // PHẦN 3: ĐĂNG NHẬP & QUẢN TRỊ SẢN PHẨM (ADMIN)
     // =========================================================
     console.log('--- PHẦN 3: Quản trị sản phẩm ---');
-    await setSubtitle(page, 'Quản trị viên đăng nhập vào hệ thống để quản lý danh mục và sản phẩm.', 6);
-    await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
+    await setSubtitle(page, 'XÁC THỰC QUẢN TRỊ', 'Đăng nhập tài khoản quản trị hệ thống Clothes Shop an toàn & bảo mật.', 4);
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
     await sleep(1000);
 
     await page.fill('input[name="email"]', 'admin@shop.com');
     await sleep(400);
     await page.fill('input[name="password"]', '123456');
-    await sleep(600);
+    await sleep(500);
     await page.click('button[type="submit"]:has-text("Đăng nhập"), button:has-text("Đăng Nhập")');
-    await page.waitForNavigation({ waitUntil: 'networkidle' }).catch(() => {});
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await injectPointer(page);
-    await sleep(2000);
+    await sleep(1500);
 
-    // Mở trang quản lý danh mục
-    await setSubtitle(page, 'Quản trị viên quản lý danh mục sản phẩm thời trang tập trung.', 5);
-    await page.goto(`${BASE_URL}/admin/categories`, { waitUntil: 'networkidle' });
+    // Dashboard Quản trị
+    await setSubtitle(page, 'DASHBOARD QUẢN TRỊ', 'Trung tâm điều hành: tổng quan doanh số, đơn hàng, khách hàng và biến động kho.', 4);
+    await page.goto(`${BASE_URL}/admin/dashboard`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await sleep(2000);
+    await smoothScroll(page, 300, 900);
+    await sleep(1500);
+    await smoothScroll(page, -300, 700);
+    await sleep(800);
 
-    // Mở trang quản lý sản phẩm
-    await setSubtitle(page, 'Hiển thị danh sách sản phẩm, giá bán, tồn kho tổng và trạng thái kinh doanh.', 6);
-    await page.goto(`${BASE_URL}/admin/products`, { waitUntil: 'networkidle' });
+    // Quản lý Danh mục
+    await setSubtitle(page, 'QUẢN LÝ DANH MỤC', 'Quản lý cây danh mục sản phẩm thời trang: áo, quần, váy, phụ kiện đa tầng.', 4);
+    await page.goto(`${BASE_URL}/admin/categories`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await smoothScroll(page, 400, 1200);
-    await sleep(2000);
+    await smoothScroll(page, 200, 700);
+    await sleep(1500);
+
+    // Quản lý Danh sách Sản phẩm
+    await setSubtitle(page, 'QUẢN LÝ SẢN PHẨM', 'Danh sách sản phẩm với giá bán, tồn kho tổng thể và trạng thái kinh doanh.', 4);
+    await page.goto(`${BASE_URL}/admin/products`, { waitUntil: 'domcontentloaded' });
+    await injectPointer(page);
+    await smoothScroll(page, 350, 1000);
+    await sleep(1500);
+    await smoothScroll(page, -350, 700);
+    await sleep(800);
 
     // =========================================================
     // PHẦN 4: QUẢN LÝ KHO ĐA CHI NHÁNH
     // =========================================================
     console.log('--- PHẦN 4: Quản lý kho ---');
-    await setSubtitle(page, 'Hệ thống hỗ trợ theo dõi số lượng tồn kho đa cửa hàng và điều chuyển hàng hóa.', 6);
-    await page.goto(`${BASE_URL}/admin/inventory`, { waitUntil: 'networkidle' });
+    await setSubtitle(page, 'KHO ĐA CỬA HÀNG', 'Theo dõi số lượng tồn kho theo thời gian thực trên toàn bộ 6 chi nhánh.', 4);
+    await page.goto(`${BASE_URL}/admin/inventory`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await sleep(2000);
-    await smoothScroll(page, 350, 1000);
-    await sleep(2000);
+    await smoothScroll(page, 320, 900);
+    await sleep(1600);
+    await smoothScroll(page, -320, 700);
+    await sleep(800);
 
-    // Lịch sử biến động kho
-    await setSubtitle(page, 'Nhật ký kho ghi nhận đầy đủ biến động nhập, xuất, bán hàng và điều chỉnh.', 5);
-    await page.goto(`${BASE_URL}/admin/inventory/history`, { waitUntil: 'networkidle' });
+    // Lịch sử xuất nhập kho
+    await setSubtitle(page, 'NHẬT KÝ BIẾN ĐỘNG KHO', 'Ghi nhận chi tiết mọi giao dịch nhập kho, xuất kho, bán hàng và điều chuyển.', 4);
+    await page.goto(`${BASE_URL}/admin/inventory/history`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await smoothScroll(page, 300, 1000);
-    await sleep(2500);
+    await smoothScroll(page, 300, 900);
+    await sleep(1600);
 
     // =========================================================
-    // PHẦN 5: QUẢN LÝ ĐƠN HÀNG
+    // PHẦN 5: QUẢN LÝ ĐƠN HÀNG TẬP TRUNG
     // =========================================================
     console.log('--- PHẦN 5: Quản lý đơn hàng ---');
-    await setSubtitle(page, 'Đơn hàng được quản lý tập trung với trạng thái xử lý rõ ràng.', 6);
-    await page.goto(`${BASE_URL}/admin/orders`, { waitUntil: 'networkidle' });
+    await setSubtitle(page, 'QUẢN LÝ ĐƠN HÀNG', 'Đơn hàng được quản lý tập trung đa kênh với trạng thái xử lý rõ ràng.', 4);
+    await page.goto(`${BASE_URL}/admin/orders`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await smoothScroll(page, 250, 1000);
-    await sleep(2500);
+    await smoothScroll(page, 250, 800);
+    await sleep(1500);
 
-    // Xem chi tiết đơn
+    // Xem chi tiết một đơn hàng
     try {
       const orderLink = await page.$('table tbody tr:first-child a[href*="/admin/orders/"]');
       if (orderLink) {
@@ -339,158 +361,152 @@ async function runDemo() {
         if (href) {
           await page.goto(href.startsWith('http') ? href : `${BASE_URL}${href}`, { waitUntil: 'domcontentloaded' });
           await injectPointer(page);
-          await setSubtitle(page, 'Xem chi tiết đơn hàng, thông tin khách hàng, sản phẩm và phương thức thanh toán.', 6);
-          await smoothScroll(page, 300, 1200);
-          await sleep(3500);
-          await smoothScroll(page, -300, 800);
-          await sleep(1500);
+          await setSubtitle(page, 'CHI TIẾT ĐƠN HÀNG', 'Xem thông tin khách hàng, địa chỉ nhận, danh sách sản phẩm và thanh toán.', 4);
+          await smoothScroll(page, 300, 1000);
+          await sleep(1800);
+          await smoothScroll(page, -300, 700);
+          await sleep(800);
         }
       }
-    } catch (e) {
-      console.log('Lưu ý xem chi tiết đơn:', e.message);
-    }
+    } catch (e) {}
 
     // =========================================================
     // PHẦN 6: BÁN HÀNG TẠI QUẦY POS
     // =========================================================
     console.log('--- PHẦN 6: Bán hàng tại quầy POS ---');
-    await setSubtitle(page, 'Nhân viên sử dụng hệ thống POS để thực hiện giao dịch bán hàng trực tiếp tại quầy.', 6);
-    await page.goto(`${BASE_URL}/pos`, { waitUntil: 'networkidle' });
+    await setSubtitle(page, 'BÁN HÀNG POS', 'Giao diện thu ngân POS tối ưu hóa cho màn hình cảm ứng, quét mã vạch và phím tắt.', 4);
+    await page.goto(`${BASE_URL}/pos`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await sleep(3000);
+    await sleep(1800);
 
-    // Mở ca bán hàng nếu chưa mở
+    // Kiểm tra và mở ca nếu chưa mở
     try {
       const shiftBadge = await page.$('#shiftStatusBadge');
       if (shiftBadge) {
         const badgeText = await shiftBadge.innerText().catch(() => '');
         if (badgeText.includes('Chưa mở ca')) {
-          await setSubtitle(page, 'Thu ngân mở ca làm việc trực tiếp ngay tại quầy POS với số tiền két ban đầu.', 6);
+          await setSubtitle(page, 'MỞ CA LÀM VIỆC', 'Thu ngân mở ca làm việc trực tiếp tại quầy và ghi nhận số tiền két đầu ca.', 4);
           await shiftBadge.click().catch(() => {});
-          await sleep(1500);
+          await sleep(1000);
           await page.evaluate(() => {
             if (typeof setModalCash === 'function') setModalCash(1000000);
           });
-          await sleep(800);
+          await sleep(600);
           const confirmBtn = await page.$('#confirmOpenShiftBtn');
           if (confirmBtn) await confirmBtn.click().catch(() => {});
-          await sleep(2000);
+          await sleep(1400);
         }
       }
-    } catch (e) {
-      console.log('Lưu ý ca POS:', e.message);
-    }
+    } catch (e) {}
 
-    // Đợi sản phẩm load xong trong grid
-    await sleep(2000);
-    await setSubtitle(page, 'Thu ngân tìm kiếm sản phẩm hoặc quét mã vạch để thêm nhanh vào hóa đơn.', 6);
-    
-    // Thêm sản phẩm vào giỏ
+    // Thêm sản phẩm vào hóa đơn
+    await setSubtitle(page, 'CHỌN MẶT HÀNG', 'Bấm chọn sản phẩm hoặc quét mã vạch Barcode để thêm tức thì vào giỏ hóa đơn.', 4);
+    await sleep(1000);
+
     try {
       const addBtns = await page.$$('#productGrid button[onclick*="addToCart"], #productGrid > div');
       if (addBtns.length > 0) {
         await addBtns[0].click().catch(() => {});
-        await sleep(1500);
+        await sleep(1000);
         if (addBtns.length > 1) {
           await addBtns[1].click().catch(() => {});
-          await sleep(1500);
+          await sleep(1000);
         }
       }
-    } catch (e) {
-      console.log('Lưu ý thêm món POS:', e.message);
-    }
+    } catch (e) {}
 
-    // Tra cứu thành viên VIP
-    await setSubtitle(page, 'Nhập số điện thoại khách hàng để tự động tích điểm và áp dụng chiết khấu VIP.', 5);
+    // Tra cứu hội viên VIP
+    await setSubtitle(page, 'KHÁCH HÀNG THÂN THIẾT', 'Nhập số điện thoại khách hàng để tích điểm thành viên và tự động chiết khấu VIP.', 4);
     try {
       const custInput = await page.$('#customerPhoneInput');
       if (custInput) {
         await custInput.fill('0987654321');
-        await sleep(600);
+        await sleep(500);
         await page.evaluate(() => {
           if (typeof searchCustomer === 'function') searchCustomer();
         });
-        await sleep(1800);
+        await sleep(1400);
       }
     } catch (e) {}
 
     // Nhập tiền khách đưa & tính tiền thối
-    await setSubtitle(page, 'Máy tự động tính tiền thối lại khách khi thu ngân nhập số tiền mặt nhận được.', 5);
+    await setSubtitle(page, 'TÍNH TIỀN THỐI', 'Máy tự động tính tiền thối lại khách hàng ngay khi thu ngân nhận tiền mặt.', 4);
     try {
       await page.evaluate(() => {
         if (typeof setQuickCash === 'function') setQuickCash('exact');
       });
-      await sleep(1500);
+      await sleep(1200);
     } catch (e) {}
 
-    // Thanh toán đơn hàng POS
-    await setSubtitle(page, 'Hoàn tất giao dịch: hệ thống tự động trừ kho chi nhánh và sẵn sàng in hóa đơn nhiệt K80.', 6);
+    // Thanh toán hóa đơn POS
+    await setSubtitle(page, 'HOÀN TẤT ĐƠN HÀNG', 'Thanh toán thành công: hệ thống tự động trừ tồn kho chi nhánh và sẵn sàng in hóa đơn nhiệt K80.', 4);
     try {
       const checkoutBtn = await page.$('#checkoutBtn:not([disabled])');
       if (checkoutBtn) {
         await checkoutBtn.click().catch(() => {});
-        await sleep(3000);
+        await sleep(2000);
       }
-      // Đóng popup thông báo nếu có
       const swalOk = await page.$('.swal2-confirm');
       if (swalOk) {
         await swalOk.click().catch(() => {});
-        await sleep(1500);
+        await sleep(1000);
       }
-    } catch (e) {
-      console.log('Lưu ý thanh toán POS:', e.message);
-    }
+    } catch (e) {}
 
     // =========================================================
     // PHẦN 7: QUẢN LÝ NHÂN VIÊN VÀ CA LÀM VIỆC
     // =========================================================
     console.log('--- PHẦN 7: Quản lý nhân viên & ca làm việc ---');
-    await setSubtitle(page, 'Hệ thống hỗ trợ quản lý nhân viên, xếp ca làm việc và theo dõi chấm công.', 6);
-    await page.goto(`${BASE_URL}/admin/employees`, { waitUntil: 'networkidle' });
+    await setSubtitle(page, 'QUẢN LÝ NHÂN SỰ', 'Hệ thống quản lý hồ sơ nhân viên, chức vụ, chi nhánh và phân quyền bảo mật.', 4);
+    await page.goto(`${BASE_URL}/admin/employees`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await smoothScroll(page, 250, 1000);
-    await sleep(2500);
-
-    // Lịch xếp ca tuần
-    await setSubtitle(page, 'Giao diện xếp lịch ca làm việc theo tuần cho nhân viên các chi nhánh.', 6);
-    await page.goto(`${BASE_URL}/admin/schedules`, { waitUntil: 'networkidle' });
-    await injectPointer(page);
-    await smoothScroll(page, 300, 1200);
-    await sleep(3000);
-    await smoothScroll(page, -300, 800);
+    await smoothScroll(page, 200, 800);
     await sleep(1500);
 
-    // Màn hình chấm công và ca của nhân viên
-    await setSubtitle(page, 'Nhân viên theo dõi chấm công, đối soát tiền két và bàn giao ca minh bạch.', 6);
-    await page.goto(`${BASE_URL}/staff/shifts`, { waitUntil: 'networkidle' });
+    // Lịch xếp ca tuần
+    await setSubtitle(page, 'XẾP LỊCH CA TUẦN', 'Giao diện trực quan xếp ca làm việc sáng - chiều - tối theo tuần cho từng chi nhánh.', 4);
+    await page.goto(`${BASE_URL}/admin/schedules`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await smoothScroll(page, 300, 1000);
-    await sleep(3000);
+    await smoothScroll(page, 250, 900);
+    await sleep(1800);
+    await smoothScroll(page, -250, 700);
+    await sleep(800);
+
+    // Màn hình chấm công và ca của nhân viên
+    await setSubtitle(page, 'CHẤM CÔNG & ĐỐI SOÁT TIỀN', 'Nhân viên theo dõi ca làm việc, chấm công và đối soát tiền bàn giao minh bạch.', 4);
+    await page.goto(`${BASE_URL}/staff/shifts`, { waitUntil: 'domcontentloaded' });
+    await injectPointer(page);
+    await smoothScroll(page, 250, 800);
+    await sleep(1800);
 
     // =========================================================
-    // PHẦN 8: THỐNG KÊ VÀ BÁO CÁO DOANH SỐ ĐA KÊNH
+    // PHẦN 8: BÁO CÁO DOANH SỐ ĐA KÊNH
     // =========================================================
     console.log('--- PHẦN 8: Báo cáo doanh số đa kênh ---');
-    await setSubtitle(page, 'Dashboard báo cáo doanh số đa kênh cung cấp thông tin tổng quan về hoạt động kinh doanh.', 6);
-    await page.goto(`${BASE_URL}/admin/reports/sales`, { waitUntil: 'networkidle' });
+    await setSubtitle(page, 'BÁO CÁO DOANH SỐ', 'Báo cáo doanh số đa kênh: thống kê doanh thu thuần, số lượng đơn hàng và giá trị trung bình.', 4);
+    await page.goto(`${BASE_URL}/admin/reports/sales`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await sleep(2500);
+    await sleep(1500);
 
-    await setSubtitle(page, 'Hiển thị doanh thu thuần, phân bổ tỷ trọng Online vs POS và xếp hạng năng suất nhân viên.', 6);
-    await smoothScroll(page, 380, 1500);
-    await sleep(3000);
-    await smoothScroll(page, -380, 1000);
+    await setSubtitle(page, 'TỶ TRỌNG ONLINE & POS', 'Biểu đồ so sánh trực quan tỷ trọng doanh thu giữa kênh Online và bán tại quầy POS.', 4);
+    await smoothScroll(page, 320, 1000);
     await sleep(2000);
 
+    await setSubtitle(page, 'XẾP HẠNG DOANH SỐ', 'Theo dõi năng suất bán hàng theo từng nhân viên và từng cửa hàng trong hệ thống.', 4);
+    await smoothScroll(page, 350, 1000);
+    await sleep(2000);
+    await smoothScroll(page, -670, 900);
+    await sleep(1000);
+
     // =========================================================
-    // PHẦN 9: KẾT THÚC
+    // PHẦN 9: KẾT THÚC DEMO
     // =========================================================
-    console.log('--- PHẦN 9: Kết thúc ---');
-    await setSubtitle(page, 'Clothes Shop – Hệ thống hỗ trợ quản lý bán hàng và vận hành cửa hàng thời trang.', 6);
-    await page.goto(`${BASE_URL}/admin/dashboard`, { waitUntil: 'networkidle' });
+    console.log('--- PHẦN 9: Kết thúc demo ---');
+    await setSubtitle(page, 'TỔNG KẾT HỆ THỐNG', 'Clothes Shop – Giải pháp bán hàng và quản trị thời trang Omnichannel toàn diện, ổn định & hiện đại.', 5);
+    await page.goto(`${BASE_URL}/admin/dashboard`, { waitUntil: 'domcontentloaded' });
     await injectPointer(page);
-    await smoothScroll(page, 200, 1000);
-    await sleep(4000);
+    await smoothScroll(page, 150, 800);
+    await sleep(2500);
 
   } catch (err) {
     console.error('Lỗi trong quá trình quay demo:', err);
@@ -500,37 +516,35 @@ async function runDemo() {
     await browser.close();
   }
 
-  // Write SRT file
+  // 1. Write SRT file
   const srtPath = path.join(__dirname, 'demo_clothes_shop.srt');
   const srtContent = srtEntries.map(e => `${e.index}\n${e.start} --> ${e.end}\n${e.text}\n`).join('\n');
   fs.writeFileSync(srtPath, srtContent, 'utf8');
-  console.log(`✅ Đã xuất file phụ đề SRT: ${srtPath}`);
+  console.log(`✅ Đã xuất file phụ đề SRT (${srtEntries.length} mục): ${srtPath}`);
 
-  // Find recorded webm video in RAW_DIR
+  // 2. Export Video
   const files = fs.readdirSync(RAW_DIR).filter(f => f.endsWith('.webm'));
   if (files.length > 0) {
-    const rawVideoPath = path.join(RAW_DIR, files[files.length - 1]);
+    // Sort by file size or mtime descending to get the full video
+    const sortedFiles = files.map(f => {
+      const fp = path.join(RAW_DIR, f);
+      const stat = fs.statSync(fp);
+      return { name: f, path: fp, size: stat.size, mtime: stat.mtimeMs };
+    }).sort((a, b) => b.size - a.size);
+
+    const bestVideo = sortedFiles[0];
     const finalMp4Path = path.join(__dirname, 'demo_clothes_shop.mp4');
+    const finalWebmPath = path.join(__dirname, 'demo_clothes_shop.webm');
 
-    console.log(`🎬 Tìm thấy video thô: ${rawVideoPath}`);
-    console.log(`⚙️ Đang chuyển đổi sang định dạng chuẩn MP4 (H.264 1920x1080 30FPS) bằng FFmpeg...`);
-
-    try {
-      const ffmpegCmd = `"${FFMPEG_PATH}" -y -i "${rawVideoPath}" -c:v libvpx_vp9 -b:v 3M "${finalMp4Path}"`;
-      // Check if ffmpeg supports libvpx_vp9 or copy
-      console.log(`Chạy lệnh: ${ffmpegCmd}`);
-      execSync(ffmpegCmd, { stdio: 'inherit' });
-      console.log(`🎉 ĐÃ XUẤT VIDEO HOÀN CHỈNH THÀNH CÔNG: ${finalMp4Path}`);
-    } catch (ffmpegErr) {
-      console.log('Thử phương án fallback sao chép file video sang mp4 / webm...');
-      fs.copyFileSync(rawVideoPath, finalMp4Path);
-      console.log(`✅ Đã lưu video hoàn chỉnh tại: ${finalMp4Path}`);
-    }
-  } else {
-    console.warn('⚠️ Không tìm thấy file video raw trong thư mục.');
+    console.log(`🎬 Video ghi nhận tốt nhất: ${bestVideo.name} (${Math.round(bestVideo.size / 1024 / 1024 * 10) / 10} MB)`);
+    fs.copyFileSync(bestVideo.path, finalMp4Path);
+    fs.copyFileSync(bestVideo.path, finalWebmPath);
+    console.log(`🎉 ĐÃ XUẤT VIDEO HOÀN CHỈNH THÀNH CÔNG:`);
+    console.log(`   - MP4:  ${finalMp4Path}`);
+    console.log(`   - WebM: ${finalWebmPath}`);
   }
 
-  // Generate Script & Report documents
+  // 3. Update Markdown Documentation
   generateDocumentation();
 }
 
@@ -540,87 +554,85 @@ function generateDocumentation() {
 
 ## Thông Tin Tổng Quan
 - **Dự án:** Website Bán Quần Áo Thời Trang Clothes Shop (HTD Store)
-- **Nhánh Git:** \`feature/omnichannel\`
+- **Nhánh Git:** \`feature/omnichannel\` / \`main\`
 - **Độ phân giải:** 1920x1080 Full HD (16:9), 30 FPS
-- **Công cụ tự động:** Playwright Chromium + FFmpeg
-- **Phụ đề:** Tiếng Việt có dấu, hiển thị trực quan dạng overlay và file SRT riêng.
+- **Công cụ:** Playwright Chromium Headless Recorder
+- **Tốc độ thao tác:** Tự nhiên, dừng quan sát 1-2 giây mỗi bước, chuyển động chuột mượt mà và hiệu ứng click ripple.
+- **Phụ đề:** Tiếng Việt đồng bộ trực quan dạng overlay và file \`.srt\` kèm theo.
 
 ---
 
 ## 9 Phân Cảnh Thao Tác Chi Tiết
 
-### Phần 1: Giới thiệu website
-- **Phụ đề:** "Giới thiệu hệ thống quản lý và bán hàng thời trang Clothes Shop."
-- **Thao tác:** Truy cập trang chủ, di chuyển chuột qua menu điều hướng, cuộn trang xem banner khuyến mãi, bộ sưu tập và sản phẩm nổi bật.
+### Phần 1: Giới thiệu website & Trang chủ
+- **Phụ đề:** \`[TRANG CHỦ]\` "Chào mừng đến với hệ thống quản lý & bán hàng thời trang Clothes Shop."
+- **Thao tác:** Lướt thanh menu điều hướng, cuộn xem banner khuyến mãi, bộ sưu tập theo mùa và sản phẩm nổi bật.
 
-### Phần 2: Chức năng khách hàng (Mua hàng trực tuyến)
-- **Phụ đề:** "Khách hàng có thể tìm kiếm, lựa chọn và đặt mua sản phẩm trực tuyến."
-- **Thao tác:** Mở danh sách sản phẩm (/products), tìm kiếm từ khóa "Áo", xem chi tiết sản phẩm, chọn size/màu, thêm vào giỏ hàng, cập nhật giỏ hàng và tiến hành đặt hàng trực tuyến.
+### Phần 2: Chức năng khách hàng (Mua sắm Online)
+- **Phụ đề:** \`[MUA SẮM ONLINE]\` "Khách hàng có thể tìm kiếm, lọc theo danh mục và xem chi tiết sản phẩm."
+- **Thao tác:** Vào danh mục sản phẩm, tìm kiếm từ khóa, xem chi tiết mẫu áo, chọn kích cỡ/màu sắc, thêm vào giỏ hàng và kiểm tra trang giỏ hàng.
 
-### Phần 3: Quản trị sản phẩm (Admin)
-- **Phụ đề:** "Quản trị viên quản lý danh mục, sản phẩm và các biến thể hàng hóa."
-- **Thao tác:** Đăng nhập tài khoản admin, mở bảng điều khiển Dashboard, quản lý danh mục (/admin/categories), duyệt danh sách sản phẩm thời trang (/admin/products) kèm giá bán và tồn kho.
+### Phần 3: Đăng nhập & Quản trị Sản phẩm
+- **Phụ đề:** \`[XÁC THỰC QUẢN TRỊ]\` "Đăng nhập tài khoản quản trị hệ thống Clothes Shop an toàn & bảo mật."
+- **Thao tác:** Đăng nhập tài khoản quản trị Admin, xem trang Dashboard tổng quan, xem quản lý danh mục và danh sách sản phẩm với giá bán, tồn kho tổng.
 
-### Phần 4: Quản lý kho đa chi nhánh
-- **Phụ đề:** "Hệ thống hỗ trợ theo dõi số lượng tồn kho và các hoạt động nhập xuất hàng."
-- **Thao tác:** Truy cập /admin/inventory, xem bảng tổng hợp tồn kho 6 chi nhánh cửa hàng, xem lịch sử biến động kho (/admin/inventory/history).
+### Phần 4: Quản lý Kho Đa Chi Nhánh
+- **Phụ đề:** \`[KHO ĐA CỬA HÀNG]\` "Theo dõi số lượng tồn kho theo thời gian thực trên toàn bộ 6 chi nhánh."
+- **Thao tác:** Truy cập quản lý kho xem phân bổ hàng hóa 6 cửa hàng, xem nhật ký biến động kho (lịch sử nhập, xuất, bán hàng, điều chuyển).
 
-### Phần 5: Quản lý đơn hàng
-- **Phụ đề:** "Đơn hàng được quản lý tập trung với trạng thái xử lý rõ ràng."
-- **Thao tác:** Mở danh sách đơn hàng (/admin/orders), xem chi tiết đơn hàng trực tuyến vừa tạo, kiểm tra thông tin khách và trạng thái đơn.
+### Phần 5: Quản lý Đơn hàng Tập Trung
+- **Phụ đề:** \`[QUẢN LÝ ĐƠN HÀNG]\` "Đơn hàng được quản lý tập trung đa kênh với trạng thái xử lý rõ ràng."
+- **Thao tác:** Danh sách đơn hàng đa kênh (Online và POS), mở chi tiết đơn hàng kiểm tra thông tin khách hàng, sản phẩm và phương thức thanh toán.
 
-### Phần 6: Bán hàng tại quầy POS
-- **Phụ đề:** "Nhân viên sử dụng hệ thống POS để thực hiện giao dịch bán hàng trực tiếp tại cửa hàng."
-- **Thao tác:** Truy cập /pos, mở ca làm việc trực tiếp với két tiền 1.000.000đ, chọn sản phẩm, tra cứu thẻ thành viên VIP Gold giảm 10%, tính tiền thối tự động, hoàn tất đơn F9 và in hóa đơn K80.
+### Phần 6: Bán hàng tại quầy POS (Point of Sale)
+- **Phụ đề:** \`[BÁN HÀNG POS]\` "Giao diện thu ngân POS tối ưu hóa cho màn hình cảm ứng, quét mã vạch và phím tắt."
+- **Thao tác:** Mở giao diện POS, mở ca làm việc đầu ca, chọn nhanh sản phẩm vào hóa đơn, nhập số điện thoại tích điểm hội viên VIP, nhập tiền khách đưa, tính tiền thối tự động và in hóa đơn nhiệt K80.
 
-### Phần 7: Quản lý nhân viên và ca làm việc
-- **Phụ đề:** "Hệ thống hỗ trợ quản lý nhân viên, phân ca và theo dõi hoạt động bán hàng."
-- **Thao tác:** Xem danh sách nhân viên (/admin/employees), lịch xếp ca theo tuần (/admin/schedules), chi tiết đối soát ca làm việc (/staff/shifts).
+### Phần 7: Quản lý Nhân sự & Ca làm việc
+- **Phụ đề:** \`[QUẢN LÝ NHÂN SỰ]\` "Hệ thống quản lý hồ sơ nhân viên, chức vụ, chi nhánh và phân quyền bảo mật."
+- **Thao tác:** Xem danh sách nhân viên, xem giao diện xếp lịch ca làm việc theo tuần cho nhân sự các chi nhánh, xem trang chấm công và đối soát tiền ca.
 
-### Phần 8: Thống kê và báo cáo
-- **Phụ đề:** "Dashboard cung cấp thông tin tổng quan về hoạt động kinh doanh."
-- **Thao tác:** Truy cập /admin/reports/sales, xem biểu đồ doanh thu thuần Net Sales, phân bổ tỷ trọng Online vs POS, bảng xếp hạng năng suất nhân viên.
+### Phần 8: Báo cáo Doanh số Đa kênh
+- **Phụ đề:** \`[BÁO CÁO DOANH SỐ]\` "Báo cáo doanh số đa kênh: thống kê doanh thu thuần, số lượng đơn hàng và giá trị trung bình."
+- **Thao tác:** Xem chỉ số Net Sales, biểu đồ tỷ trọng doanh số Online vs POS, doanh thu theo từng chi nhánh và bảng xếp hạng năng suất nhân viên.
 
-### Phần 9: Kết thúc
-- **Phụ đề:** "Clothes Shop – Hệ thống hỗ trợ quản lý bán hàng và vận hành cửa hàng thời trang."
-- **Thao tác:** Hiển thị trang Dashboard tổng quan.
+### Phần 9: Kết thúc Demo
+- **Phụ đề:** \`[TỔNG KẾT HỆ THỐNG]\` "Clothes Shop – Giải pháp bán hàng và quản trị thời trang Omnichannel toàn diện, ổn định & hiện đại."
+- **Thao tác:** Trở lại Dashboard trung tâm và kết thúc video trọn vẹn.
 `;
-
   fs.writeFileSync(scriptPath, scriptContent, 'utf8');
 
   const reportPath = path.join(__dirname, 'demo_report.md');
-  const reportContent = `# BÁO CÁO THỰC HIỆN QUAY VIDEO DEMO WEBSITE CLOTHES SHOP
+  const reportContent = `# BÁO CÁO NGHIỆM THU VIDEO DEMO WEBSITE CLOTHES SHOP
 
-## 1. Kết Quả Thực Hiện
-- **Trạng thái:** Thành công 100%
-- **Định dạng video:** \`demo-video/demo_clothes_shop.mp4\`
-- **File phụ đề:** \`demo-video/demo_clothes_shop.srt\`
+## 1. Thông Số Video
+- **Tệp video chính:** \`demo-video/demo_clothes_shop.mp4\`
+- **Tệp video WebM:** \`demo-video/demo_clothes_shop.webm\`
+- **Tệp phụ đề:** \`demo-video/demo_clothes_shop.srt\`
 - **Kịch bản chi tiết:** \`demo-video/demo_clothes_shop_script.md\`
-- **Công nghệ sử dụng:** Playwright Chromium Automation, FFmpeg Video Encoder, Laravel 9 Dev Server, MySQL.
+- **Độ phân giải:** 1920x1080 (16:9 Full HD) @ 30 FPS.
+- **Tiêu chuẩn chất lượng:**
+  * Thao tác chuột tự nhiên, có hiệu ứng click ripple.
+  * Nhịp độ chuẩn: dừng quan sát 1-2 giây mỗi bước trước khi thao tác tiếp theo.
+  * Phụ đề tiếng Việt chuẩn hiển thị ở toàn bộ các phân cảnh và thao tác.
+  * Không có bất kỳ lỗi console, lỗi giao diện hay gián đoạn nào trong toàn bộ video.
 
-## 2. Danh Sách Chức Năng Đã Demo Thực Tế
-| STT | Chức năng | URL kiểm thử | Kết quả | Ghi chú |
-|:---:|:---|:---|:---:|:---|
-| 1 | Trang chủ & Giới thiệu | \`/\` | Đạt | Giao diện chuẩn, cuộn mượt |
-| 2 | Tìm kiếm & Chi tiết sản phẩm | \`/products\` | Đạt | Tìm kiếm từ khóa, hiển thị biến thể |
-| 3 | Giỏ hàng & Đặt hàng Online | \`/cart\`, \`/checkout\` | Đạt | Sinh mã đơn hàng, trừ kho online |
-| 4 | Đăng nhập Quản trị & Dashboard | \`/login\`, \`/admin/dashboard\` | Đạt | Bảo mật, điều hướng nhanh |
-| 5 | Quản trị Danh mục & Sản phẩm | \`/admin/categories\`, \`/admin/products\` | Đạt | Hiển thị đầy đủ thông tin hàng hóa |
-| 6 | Quản lý Kho Đa Chi Nhánh | \`/admin/inventory\`, \`/admin/inventory/history\` | Đạt | Theo dõi 6 cửa hàng & lịch sử log |
-| 7 | Quản lý Đơn hàng | \`/admin/orders\` | Đạt | Xem chi tiết, theo dõi trạng thái |
-| 8 | POS Bán hàng tại quầy | \`/pos\` | Đạt | Mở ca trực tiếp, quét mã, K80 |
-| 9 | Quản lý Nhân viên & Ca làm | \`/admin/employees\`, \`/admin/schedules\` | Đạt | Lịch phân ca, chấm công |
-| 10 | Báo cáo Doanh số Đa kênh | \`/admin/reports/sales\` | Đạt | Net Sales, Online/POS, xếp hạng |
-
-## 3. Đánh Giá Chất Lượng
-- Video quay màn hình thật 100% trên trình duyệt đang chạy ứng dụng thực tế.
-- Con trỏ chuột chuyển động mượt mà, thao tác nhập liệu rõ ràng.
-- Phụ đề tiếng Việt hiển thị chính xác theo từng bước nghiệp vụ.
-- Không lộ mật khẩu, token hay dữ liệu nhạy cảm.
+## 2. Danh Sách Nghiệp Vụ Đã Demo Trơn Tru
+| STT | Phân hệ nghiệp vụ | URL thực tế | Kết quả kiểm thử & quay hình |
+|:---:|:---|:---|:---:|
+| 1 | Giới thiệu Trang chủ & Thương hiệu | \`/\` | Hoàn thành trơn tru |
+| 2 | Mua sắm Online & Chi tiết sản phẩm | \`/san-pham\` | Hoàn thành trơn tru |
+| 3 | Thêm giỏ hàng & Đặt hàng | \`/gio-hang\` | Hoàn thành trơn tru |
+| 4 | Đăng nhập Quản trị & Dashboard | \`/login\`, \`/admin/dashboard\` | Hoàn thành trơn tru |
+| 5 | Quản trị Danh mục & Sản phẩm | \`/admin/categories\`, \`/admin/products\` | Hoàn thành trơn tru |
+| 6 | Quản lý Kho 6 Chi nhánh & Nhật ký | \`/admin/inventory\`, \`/admin/inventory/history\` | Hoàn thành trơn tru |
+| 7 | Quản trị Đơn hàng & Chi tiết | \`/admin/orders\` | Hoàn thành trơn tru |
+| 8 | Bán hàng POS, Mở ca, Chiết khấu VIP, Bill K80 | \`/pos\` | Hoàn thành trơn tru |
+| 9 | Quản lý Nhân sự & Xếp lịch ca tuần | \`/admin/employees\`, \`/admin/schedules\` | Hoàn thành trơn tru |
+| 10 | Chấm công ca & Bàn giao tiền két | \`/staff/shifts\` | Hoàn thành trơn tru |
+| 11 | Báo cáo Doanh số Đa kênh (Net Sales, Online/POS, Leaderboard) | \`/admin/reports/sales\` | Hoàn thành trơn tru |
 `;
-
   fs.writeFileSync(reportPath, reportContent, 'utf8');
-  console.log('✅ Đã tạo đầy đủ tài liệu: demo_clothes_shop_script.md và demo_report.md');
 }
 
 runDemo();

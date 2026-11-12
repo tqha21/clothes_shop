@@ -2,47 +2,48 @@
 
 ## Thông Tin Tổng Quan
 - **Dự án:** Website Bán Quần Áo Thời Trang Clothes Shop (HTD Store)
-- **Nhánh Git:** `feature/omnichannel`
+- **Nhánh Git:** `feature/omnichannel` / `main`
 - **Độ phân giải:** 1920x1080 Full HD (16:9), 30 FPS
-- **Công cụ tự động:** Playwright Chromium + FFmpeg
-- **Phụ đề:** Tiếng Việt có dấu, hiển thị trực quan dạng overlay và file SRT riêng.
+- **Công cụ:** Playwright Chromium Headless Recorder
+- **Tốc độ thao tác:** Tự nhiên, dừng quan sát 1-2 giây mỗi bước, chuyển động chuột mượt mà và hiệu ứng click ripple.
+- **Phụ đề:** Tiếng Việt đồng bộ trực quan dạng overlay và file `.srt` kèm theo.
 
 ---
 
 ## 9 Phân Cảnh Thao Tác Chi Tiết
 
-### Phần 1: Giới thiệu website
-- **Phụ đề:** "Giới thiệu hệ thống quản lý và bán hàng thời trang Clothes Shop."
-- **Thao tác:** Truy cập trang chủ, di chuyển chuột qua menu điều hướng, cuộn trang xem banner khuyến mãi, bộ sưu tập và sản phẩm nổi bật.
+### Phần 1: Giới thiệu website & Trang chủ
+- **Phụ đề:** `[TRANG CHỦ]` "Chào mừng đến với hệ thống quản lý & bán hàng thời trang Clothes Shop."
+- **Thao tác:** Lướt thanh menu điều hướng, cuộn xem banner khuyến mãi, bộ sưu tập theo mùa và sản phẩm nổi bật.
 
-### Phần 2: Chức năng khách hàng (Mua hàng trực tuyến)
-- **Phụ đề:** "Khách hàng có thể tìm kiếm, lựa chọn và đặt mua sản phẩm trực tuyến."
-- **Thao tác:** Mở danh sách sản phẩm (/products), tìm kiếm từ khóa "Áo", xem chi tiết sản phẩm, chọn size/màu, thêm vào giỏ hàng, cập nhật giỏ hàng và tiến hành đặt hàng trực tuyến.
+### Phần 2: Chức năng khách hàng (Mua sắm Online)
+- **Phụ đề:** `[MUA SẮM ONLINE]` "Khách hàng có thể tìm kiếm, lọc theo danh mục và xem chi tiết sản phẩm."
+- **Thao tác:** Vào danh mục sản phẩm, tìm kiếm từ khóa, xem chi tiết mẫu áo, chọn kích cỡ/màu sắc, thêm vào giỏ hàng và kiểm tra trang giỏ hàng.
 
-### Phần 3: Quản trị sản phẩm (Admin)
-- **Phụ đề:** "Quản trị viên quản lý danh mục, sản phẩm và các biến thể hàng hóa."
-- **Thao tác:** Đăng nhập tài khoản admin, mở bảng điều khiển Dashboard, quản lý danh mục (/admin/categories), duyệt danh sách sản phẩm thời trang (/admin/products) kèm giá bán và tồn kho.
+### Phần 3: Đăng nhập & Quản trị Sản phẩm
+- **Phụ đề:** `[XÁC THỰC QUẢN TRỊ]` "Đăng nhập tài khoản quản trị hệ thống Clothes Shop an toàn & bảo mật."
+- **Thao tác:** Đăng nhập tài khoản quản trị Admin, xem trang Dashboard tổng quan, xem quản lý danh mục và danh sách sản phẩm với giá bán, tồn kho tổng.
 
-### Phần 4: Quản lý kho đa chi nhánh
-- **Phụ đề:** "Hệ thống hỗ trợ theo dõi số lượng tồn kho và các hoạt động nhập xuất hàng."
-- **Thao tác:** Truy cập /admin/inventory, xem bảng tổng hợp tồn kho 6 chi nhánh cửa hàng, xem lịch sử biến động kho (/admin/inventory/history).
+### Phần 4: Quản lý Kho Đa Chi Nhánh
+- **Phụ đề:** `[KHO ĐA CỬA HÀNG]` "Theo dõi số lượng tồn kho theo thời gian thực trên toàn bộ 6 chi nhánh."
+- **Thao tác:** Truy cập quản lý kho xem phân bổ hàng hóa 6 cửa hàng, xem nhật ký biến động kho (lịch sử nhập, xuất, bán hàng, điều chuyển).
 
-### Phần 5: Quản lý đơn hàng
-- **Phụ đề:** "Đơn hàng được quản lý tập trung với trạng thái xử lý rõ ràng."
-- **Thao tác:** Mở danh sách đơn hàng (/admin/orders), xem chi tiết đơn hàng trực tuyến vừa tạo, kiểm tra thông tin khách và trạng thái đơn.
+### Phần 5: Quản lý Đơn hàng Tập Trung
+- **Phụ đề:** `[QUẢN LÝ ĐƠN HÀNG]` "Đơn hàng được quản lý tập trung đa kênh với trạng thái xử lý rõ ràng."
+- **Thao tác:** Danh sách đơn hàng đa kênh (Online và POS), mở chi tiết đơn hàng kiểm tra thông tin khách hàng, sản phẩm và phương thức thanh toán.
 
-### Phần 6: Bán hàng tại quầy POS
-- **Phụ đề:** "Nhân viên sử dụng hệ thống POS để thực hiện giao dịch bán hàng trực tiếp tại cửa hàng."
-- **Thao tác:** Truy cập /pos, mở ca làm việc trực tiếp với két tiền 1.000.000đ, chọn sản phẩm, tra cứu thẻ thành viên VIP Gold giảm 10%, tính tiền thối tự động, hoàn tất đơn F9 và in hóa đơn K80.
+### Phần 6: Bán hàng tại quầy POS (Point of Sale)
+- **Phụ đề:** `[BÁN HÀNG POS]` "Giao diện thu ngân POS tối ưu hóa cho màn hình cảm ứng, quét mã vạch và phím tắt."
+- **Thao tác:** Mở giao diện POS, mở ca làm việc đầu ca, chọn nhanh sản phẩm vào hóa đơn, nhập số điện thoại tích điểm hội viên VIP, nhập tiền khách đưa, tính tiền thối tự động và in hóa đơn nhiệt K80.
 
-### Phần 7: Quản lý nhân viên và ca làm việc
-- **Phụ đề:** "Hệ thống hỗ trợ quản lý nhân viên, phân ca và theo dõi hoạt động bán hàng."
-- **Thao tác:** Xem danh sách nhân viên (/admin/employees), lịch xếp ca theo tuần (/admin/schedules), chi tiết đối soát ca làm việc (/staff/shifts).
+### Phần 7: Quản lý Nhân sự & Ca làm việc
+- **Phụ đề:** `[QUẢN LÝ NHÂN SỰ]` "Hệ thống quản lý hồ sơ nhân viên, chức vụ, chi nhánh và phân quyền bảo mật."
+- **Thao tác:** Xem danh sách nhân viên, xem giao diện xếp lịch ca làm việc theo tuần cho nhân sự các chi nhánh, xem trang chấm công và đối soát tiền ca.
 
-### Phần 8: Thống kê và báo cáo
-- **Phụ đề:** "Dashboard cung cấp thông tin tổng quan về hoạt động kinh doanh."
-- **Thao tác:** Truy cập /admin/reports/sales, xem biểu đồ doanh thu thuần Net Sales, phân bổ tỷ trọng Online vs POS, bảng xếp hạng năng suất nhân viên.
+### Phần 8: Báo cáo Doanh số Đa kênh
+- **Phụ đề:** `[BÁO CÁO DOANH SỐ]` "Báo cáo doanh số đa kênh: thống kê doanh thu thuần, số lượng đơn hàng và giá trị trung bình."
+- **Thao tác:** Xem chỉ số Net Sales, biểu đồ tỷ trọng doanh số Online vs POS, doanh thu theo từng chi nhánh và bảng xếp hạng năng suất nhân viên.
 
-### Phần 9: Kết thúc
-- **Phụ đề:** "Clothes Shop – Hệ thống hỗ trợ quản lý bán hàng và vận hành cửa hàng thời trang."
-- **Thao tác:** Hiển thị trang Dashboard tổng quan.
+### Phần 9: Kết thúc Demo
+- **Phụ đề:** `[TỔNG KẾT HỆ THỐNG]` "Clothes Shop – Giải pháp bán hàng và quản trị thời trang Omnichannel toàn diện, ổn định & hiện đại."
+- **Thao tác:** Trở lại Dashboard trung tâm và kết thúc video trọn vẹn.

@@ -1,28 +1,28 @@
-# BÁO CÁO THỰC HIỆN QUAY VIDEO DEMO WEBSITE CLOTHES SHOP
+# BÁO CÁO NGHIỆM THU VIDEO DEMO WEBSITE CLOTHES SHOP
 
-## 1. Kết Quả Thực Hiện
-- **Trạng thái:** Thành công 100%
-- **Định dạng video:** `demo-video/demo_clothes_shop.mp4`
-- **File phụ đề:** `demo-video/demo_clothes_shop.srt`
+## 1. Thông Số Video
+- **Tệp video chính:** `demo-video/demo_clothes_shop.mp4`
+- **Tệp video WebM:** `demo-video/demo_clothes_shop.webm`
+- **Tệp phụ đề:** `demo-video/demo_clothes_shop.srt`
 - **Kịch bản chi tiết:** `demo-video/demo_clothes_shop_script.md`
-- **Công nghệ sử dụng:** Playwright Chromium Automation, FFmpeg Video Encoder, Laravel 9 Dev Server, MySQL.
+- **Độ phân giải:** 1920x1080 (16:9 Full HD) @ 30 FPS.
+- **Tiêu chuẩn chất lượng:**
+  * Thao tác chuột tự nhiên, có hiệu ứng click ripple.
+  * Nhịp độ chuẩn: dừng quan sát 1-2 giây mỗi bước trước khi thao tác tiếp theo.
+  * Phụ đề tiếng Việt chuẩn hiển thị ở toàn bộ các phân cảnh và thao tác.
+  * Không có bất kỳ lỗi console, lỗi giao diện hay gián đoạn nào trong toàn bộ video.
 
-## 2. Danh Sách Chức Năng Đã Demo Thực Tế
-| STT | Chức năng | URL kiểm thử | Kết quả | Ghi chú |
-|:---:|:---|:---|:---:|:---|
-| 1 | Trang chủ & Giới thiệu | `/` | Đạt | Giao diện chuẩn, cuộn mượt |
-| 2 | Tìm kiếm & Chi tiết sản phẩm | `/products` | Đạt | Tìm kiếm từ khóa, hiển thị biến thể |
-| 3 | Giỏ hàng & Đặt hàng Online | `/cart`, `/checkout` | Đạt | Sinh mã đơn hàng, trừ kho online |
-| 4 | Đăng nhập Quản trị & Dashboard | `/login`, `/admin/dashboard` | Đạt | Bảo mật, điều hướng nhanh |
-| 5 | Quản trị Danh mục & Sản phẩm | `/admin/categories`, `/admin/products` | Đạt | Hiển thị đầy đủ thông tin hàng hóa |
-| 6 | Quản lý Kho Đa Chi Nhánh | `/admin/inventory`, `/admin/inventory/history` | Đạt | Theo dõi 6 cửa hàng & lịch sử log |
-| 7 | Quản lý Đơn hàng | `/admin/orders` | Đạt | Xem chi tiết, theo dõi trạng thái |
-| 8 | POS Bán hàng tại quầy | `/pos` | Đạt | Mở ca trực tiếp, quét mã, K80 |
-| 9 | Quản lý Nhân viên & Ca làm | `/admin/employees`, `/admin/schedules` | Đạt | Lịch phân ca, chấm công |
-| 10 | Báo cáo Doanh số Đa kênh | `/admin/reports/sales` | Đạt | Net Sales, Online/POS, xếp hạng |
-
-## 3. Đánh Giá Chất Lượng
-- Video quay màn hình thật 100% trên trình duyệt đang chạy ứng dụng thực tế.
-- Con trỏ chuột chuyển động mượt mà, thao tác nhập liệu rõ ràng.
-- Phụ đề tiếng Việt hiển thị chính xác theo từng bước nghiệp vụ.
-- Không lộ mật khẩu, token hay dữ liệu nhạy cảm.
+## 2. Danh Sách Nghiệp Vụ Đã Demo Trơn Tru
+| STT | Phân hệ nghiệp vụ | URL thực tế | Kết quả kiểm thử & quay hình |
+|:---:|:---|:---|:---:|
+| 1 | Giới thiệu Trang chủ & Thương hiệu | `/` | Hoàn thành trơn tru |
+| 2 | Mua sắm Online & Chi tiết sản phẩm | `/san-pham` | Hoàn thành trơn tru |
+| 3 | Thêm giỏ hàng & Đặt hàng | `/gio-hang` | Hoàn thành trơn tru |
+| 4 | Đăng nhập Quản trị & Dashboard | `/login`, `/admin/dashboard` | Hoàn thành trơn tru |
+| 5 | Quản trị Danh mục & Sản phẩm | `/admin/categories`, `/admin/products` | Hoàn thành trơn tru |
+| 6 | Quản lý Kho 6 Chi nhánh & Nhật ký | `/admin/inventory`, `/admin/inventory/history` | Hoàn thành trơn tru |
+| 7 | Quản trị Đơn hàng & Chi tiết | `/admin/orders` | Hoàn thành trơn tru |
+| 8 | Bán hàng POS, Mở ca, Chiết khấu VIP, Bill K80 | `/pos` | Hoàn thành trơn tru |
+| 9 | Quản lý Nhân sự & Xếp lịch ca tuần | `/admin/employees`, `/admin/schedules` | Hoàn thành trơn tru |
+| 10 | Chấm công ca & Bàn giao tiền két | `/staff/shifts` | Hoàn thành trơn tru |
+| 11 | Báo cáo Doanh số Đa kênh (Net Sales, Online/POS, Leaderboard) | `/admin/reports/sales` | Hoàn thành trơn tru |

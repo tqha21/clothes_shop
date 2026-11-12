@@ -72,10 +72,16 @@ class ShiftSessionController extends Controller
         $user = Auth::user();
 
         if ($user->currentShiftSession()) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Bạn đang có một ca làm việc đang mở. Vui lòng đóng ca hiện tại trước khi mở ca mới.'], 422);
+            }
             return back()->with('error', 'Bạn đang có một ca làm việc đang mở. Vui lòng đóng ca hiện tại trước khi mở ca mới.');
         }
 
         if (!$user->canAccessStore($request->store_id)) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Bạn không có quyền mở ca tại cửa hàng này.'], 403);
+            }
             return back()->with('error', 'Bạn không có quyền mở ca tại cửa hàng này.');
         }
 
@@ -100,6 +106,20 @@ class ShiftSessionController extends Controller
             }
         }
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã mở ca làm việc thành công! Mã ca: ' . $code,
+                'session' => [
+                    'id' => $session->id,
+                    'code' => $session->code,
+                    'opening_cash' => (float) $session->opening_cash,
+                    'opening_cash_formatted' => number_format($session->opening_cash, 0, ',', '.') . 'đ',
+                    'opened_at' => $session->opened_at->format('H:i d/m/Y'),
+                ],
+            ]);
+        }
+
         return redirect()->route('staff.shifts.index')->with('success', 'Đã mở ca làm việc thành công! Mã ca: ' . $code);
     }
 
@@ -122,10 +142,18 @@ class ShiftSessionController extends Controller
             ->count();
 
         if ($pendingPayments > 0) {
-            return back()->with('error', "Không thể đóng ca! Còn {$pendingPayments} giao dịch thanh toán chưa được xác nhận hoặc hủy. Vui lòng xử lý trước khi đóng ca.");
+            $msg = "Không thể đóng ca! Còn {$pendingPayments} giao dịch thanh toán chưa được xác nhận hoặc hủy. Vui lòng xử lý trước khi đóng ca.";
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
         }
 
-        DB::transaction(function () use ($session, $request) {
+        $expectedCash = 0;
+        $countedCash = 0;
+        $difference = 0;
+
+        DB::transaction(function () use ($session, $request, &$expectedCash, &$countedCash, &$difference) {
             $expectedCash = $session->current_expected_cash;
             $countedCash = (float) $request->input('counted_cash');
             $difference = round($countedCash - $expectedCash, 2);
@@ -149,6 +177,20 @@ class ShiftSessionController extends Controller
                 }
             }
         });
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã đóng ca làm việc và hoàn tất bàn giao!',
+                'session' => [
+                    'id' => $session->id,
+                    'code' => $session->code,
+                    'expected_cash' => $expectedCash,
+                    'counted_cash' => $countedCash,
+                    'difference' => $difference,
+                ],
+            ]);
+        }
 
         return redirect()->route('staff.shifts.index')->with('success', 'Đã đóng ca làm việc và hoàn tất bàn giao!');
     }

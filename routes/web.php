@@ -111,7 +111,7 @@ Route::middleware(['auth'])->prefix('pos')->name('pos.')->group(function () {
 // ==========================================
 // Staff Shift & Attendance Routes (Mở/đóng ca & Chấm công)
 // ==========================================
-Route::middleware(['auth', 'can:shift.view'])->prefix('staff/shifts')->name('staff.shifts.')->group(function () {
+Route::middleware(['auth'])->prefix('staff/shifts')->name('staff.shifts.')->group(function () {
     Route::get('/', [ShiftSessionController::class, 'index'])->name('index');
     Route::post('/open', [ShiftSessionController::class, 'open'])->name('open');
     Route::post('/{session}/close', [ShiftSessionController::class, 'close'])->name('close');

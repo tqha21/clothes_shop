@@ -43,17 +43,19 @@
             </div>
 
             <!-- Shift Status Badge -->
-            @if($activeSession)
-                <a href="{{ route('staff.shifts.index') }}" class="flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-500/25 transition">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Ca mở: {{ $activeSession->code }} (Đầu ca: {{ number_format($activeSession->opening_cash) }}đ)</span>
-                </a>
-            @else
-                <a href="{{ route('staff.shifts.index') }}" class="flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-amber-500/25 transition">
-                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                    <span>Chưa mở ca - Bấm vào đây để mở ca</span>
-                </a>
-            @endif
+            <div id="shiftBadgeContainer">
+                @if($activeSession)
+                    <button type="button" onclick="openShiftDetailModal('{{ $activeSession->code }}', '{{ number_format($activeSession->opening_cash) }}đ', '{{ $activeSession->opened_at->format('H:i d/m/Y') }}', {{ $activeSession->id }})" id="shiftStatusBadge" class="flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-500/25 transition cursor-pointer" title="Bấm để xem chi tiết ca / kết ca">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span id="shiftBadgeText">Ca mở: {{ $activeSession->code }} (Đầu ca: {{ number_format($activeSession->opening_cash) }}đ)</span>
+                    </button>
+                @else
+                    <button type="button" onclick="openOpenShiftModal()" id="shiftStatusBadge" class="flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-amber-500/25 transition cursor-pointer" title="Bấm để mở ca làm việc trực tiếp">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                        <span id="shiftBadgeText">Chưa mở ca - Bấm vào đây để mở ca</span>
+                    </button>
+                @endif
+            </div>
         </div>
 
         <div class="flex items-center gap-3 text-xs">
@@ -801,6 +803,310 @@
         function parseNumberFromVND(str) {
             return parseFloat(str.replace(/[^\d]/g, '')) || 0;
         }
+
+        // ==========================================
+        // Shift Management Modals for POS
+        // ==========================================
+        let currentActiveSession = @json($activeSession ? [
+            'id' => $activeSession->id,
+            'code' => $activeSession->code,
+            'opening_cash' => $activeSession->opening_cash,
+            'opening_cash_formatted' => number_format($activeSession->opening_cash) . 'đ',
+            'opened_at' => $activeSession->opened_at->format('H:i d/m/Y'),
+        ] : null);
+
+        function openOpenShiftModal() {
+            document.getElementById('openShiftModal').classList.remove('hidden');
+            document.getElementById('modalOpeningCash').focus();
+        }
+
+        function closeOpenShiftModal() {
+            document.getElementById('openShiftModal').classList.add('hidden');
+        }
+
+        function setModalCash(amount) {
+            document.getElementById('modalOpeningCash').value = amount;
+        }
+
+        async function confirmOpenShift() {
+            const openingCash = parseFloat(document.getElementById('modalOpeningCash').value) || 0;
+            const openNote = document.getElementById('modalOpenNote').value.trim();
+            const submitBtn = document.getElementById('confirmOpenShiftBtn');
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="inline-block animate-spin mr-1">⏳</span> Đang mở ca...';
+
+            try {
+                const res = await fetch(`{{ route('staff.shifts.open') }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        store_id: STORE_ID,
+                        opening_cash: openingCash,
+                        open_note: openNote,
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    currentActiveSession = data.session;
+                    closeOpenShiftModal();
+
+                    // Cập nhật giao diện badge trên header
+                    const badgeContainer = document.getElementById('shiftBadgeContainer');
+                    badgeContainer.innerHTML = `
+                        <button type="button" onclick="openShiftDetailModal('${data.session.code}', '${data.session.opening_cash_formatted}', '${data.session.opened_at}', ${data.session.id})" id="shiftStatusBadge" class="flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-500/25 transition cursor-pointer" title="Bấm để xem chi tiết ca / kết ca">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span id="shiftBadgeText">Ca mở: ${data.session.code} (Đầu ca: ${data.session.opening_cash_formatted})</span>
+                        </button>
+                    `;
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Mở ca thành công!',
+                        text: `Mã ca: ${data.session.code} - Tiền két đầu ca: ${data.session.opening_cash_formatted}`,
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Không thể mở ca', text: data.message || 'Có lỗi xảy ra.' });
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể kết nối đến máy chủ.' });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Xác Nhận Mở Ca';
+            }
+        }
+
+        function openShiftDetailModal(code, cash, openedAt, id) {
+            document.getElementById('modalDetailCode').textContent = code || (currentActiveSession?.code ?? 'N/A');
+            document.getElementById('modalDetailCash').textContent = cash || (currentActiveSession?.opening_cash_formatted ?? '0đ');
+            document.getElementById('modalDetailOpenedAt').textContent = openedAt || (currentActiveSession?.opened_at ?? 'Hôm nay');
+            document.getElementById('shiftDetailModal').classList.remove('hidden');
+        }
+
+        function closeShiftDetailModal() {
+            document.getElementById('shiftDetailModal').classList.add('hidden');
+        }
+
+        async function quickCloseShift() {
+            closeShiftDetailModal();
+            const { value: countedCash } = await Swal.fire({
+                title: 'Kết ca & Đối soát tiền mặt',
+                text: 'Nhập tổng số tiền mặt thực tế kiểm đếm được trong két:',
+                input: 'number',
+                inputAttributes: {
+                    min: 0,
+                    step: 1000,
+                    placeholder: 'Ví dụ: 2500000'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Đóng ca ngay',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#e11d48',
+                inputValidator: (val) => {
+                    if (!val && val !== '0') return 'Vui lòng nhập số tiền thực tế trong két!';
+                }
+            });
+
+            if (countedCash !== undefined) {
+                const sessionId = currentActiveSession?.id;
+                if (!sessionId) {
+                    window.location.href = `{{ route('staff.shifts.index') }}`;
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`/staff/shifts/${sessionId}/close`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            counted_cash: parseFloat(countedCash),
+                            close_note: 'Đóng ca trực tiếp từ POS',
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (data.success) {
+                        currentActiveSession = null;
+                        const badgeContainer = document.getElementById('shiftBadgeContainer');
+                        badgeContainer.innerHTML = `
+                            <button type="button" onclick="openOpenShiftModal()" id="shiftStatusBadge" class="flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-amber-500/25 transition cursor-pointer" title="Bấm để mở ca làm việc trực tiếp">
+                                <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                                <span id="shiftBadgeText">Chưa mở ca - Bấm vào đây để mở ca</span>
+                            </button>
+                        `;
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Đã đóng ca thành công!',
+                            html: `
+                                <div class="text-sm space-y-1 text-left bg-slate-50 p-3 rounded-lg border">
+                                    <div>Tiền đếm được: <strong>${formatVND(data.session.counted_cash)}</strong></div>
+                                    <div>Tiền dự kiến: <strong>${formatVND(data.session.expected_cash)}</strong></div>
+                                    <div class="${data.session.difference >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-bold">
+                                        Chênh lệch: ${data.session.difference >= 0 ? '+' : ''}${formatVND(data.session.difference)}
+                                    </div>
+                                </div>
+                            `,
+                            confirmButtonText: 'Đồng ý',
+                            confirmButtonColor: '#e11d48',
+                        });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Không thể đóng ca', text: data.message || 'Có lỗi xảy ra.' });
+                    }
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Có lỗi xảy ra khi đóng ca.' });
+                }
+            }
+        }
+    </script>
+
+    <!-- Modal Mở Ca Bán Hàng Trực Tiếp tại POS -->
+    <div id="openShiftModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all animate-fadeIn">
+            <!-- Header Modal -->
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
+                        ⏱️
+                    </span>
+                    <div>
+                        <h3 class="font-bold text-base leading-tight">Mở Ca Làm Việc POS</h3>
+                        <p class="text-xs text-slate-400">Khởi tạo ca thu ngân & tiền mặt trong két</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeOpenShiftModal()" class="text-slate-400 hover:text-white text-lg p-1">✕</button>
+            </div>
+
+            <!-- Body Modal -->
+            <div class="p-5 space-y-4">
+                <!-- Info staff & store -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1.5">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Thu ngân:</span>
+                        <strong class="text-slate-800">{{ auth()->user()->name }} ({{ strtoupper(auth()->user()->role) }})</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Chi nhánh:</span>
+                        <strong class="text-slate-800">{{ $currentStore->name ?? 'Cửa hàng chính' }}</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Thời gian mở:</span>
+                        <strong class="text-slate-800">{{ now()->format('H:i d/m/Y') }}</strong>
+                    </div>
+                </div>
+
+                <!-- Opening Cash -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                        Tiền mặt đầu ca trong két (VNĐ) <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="number" id="modalOpeningCash" value="0" min="0" step="1000"
+                               class="w-full pl-3 pr-12 py-2.5 bg-white border border-slate-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 rounded-xl text-base font-bold text-slate-800 outline-none transition font-mono">
+                        <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-bold">VNĐ</span>
+                    </div>
+
+                    <!-- Quick buttons -->
+                    <div class="grid grid-cols-4 gap-1.5 mt-2">
+                        <button type="button" onclick="setModalCash(0)" class="py-1 px-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold transition text-center">0đ</button>
+                        <button type="button" onclick="setModalCash(500000)" class="py-1 px-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold transition text-center">500.000đ</button>
+                        <button type="button" onclick="setModalCash(1000000)" class="py-1 px-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold transition text-center">1.000.000đ</button>
+                        <button type="button" onclick="setModalCash(2000000)" class="py-1 px-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold transition text-center">2.000.000đ</button>
+                    </div>
+                </div>
+
+                <!-- Open Note -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Ghi chú mở ca (Tùy chọn)</label>
+                    <input type="text" id="modalOpenNote" placeholder="Ví dụ: Nhận két tiền lẻ từ ca trước..."
+                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500">
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button type="button" onclick="closeOpenShiftModal()" class="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold transition">
+                    Đóng
+                </button>
+                <button type="button" id="confirmOpenShiftBtn" onclick="confirmOpenShift()" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
+                    Xác Nhận Mở Ca
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chi Tiết Ca Làm Việc Đang Mở -->
+    <div id="shiftDetailModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all animate-fadeIn">
+            <!-- Header Modal -->
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+                        💼
+                    </span>
+                    <div>
+                        <h3 class="font-bold text-base leading-tight">Ca Bán Hàng Đang Mở</h3>
+                        <p class="text-xs text-slate-400">Thông tin ca làm việc thu ngân hiện tại</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeShiftDetailModal()" class="text-slate-400 hover:text-white text-lg p-1">✕</button>
+            </div>
+
+            <!-- Body Modal -->
+            <div class="p-5 space-y-3">
+                <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-emerald-700 font-medium">Mã phiên ca:</span>
+                        <strong id="modalDetailCode" class="font-mono text-emerald-900">CA...</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-emerald-700 font-medium">Thời gian mở:</span>
+                        <strong id="modalDetailOpenedAt" class="text-emerald-900">...</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-emerald-700 font-medium">Tiền mặt đầu ca:</span>
+                        <strong id="modalDetailCash" class="text-emerald-900 font-mono text-sm">0đ</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-emerald-700 font-medium">Thu ngân phụ trách:</span>
+                        <strong class="text-emerald-900">{{ auth()->user()->name }}</strong>
+                    </div>
+                </div>
+
+                <div class="pt-2 text-xs text-slate-500">
+                    💡 Bạn có thể kết thúc ca trực tiếp tại đây hoặc chuyển đến trang quản lý đầy đủ để đối soát tiền thừa/thiếu, thu chi và bàn giao ca.
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
+                <a href="{{ route('staff.shifts.index') }}" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-semibold transition flex items-center gap-1">
+                    <span>📋 Quản lý chi tiết</span>
+                </a>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeShiftDetailModal()" class="px-3 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold transition">
+                        Đóng
+                    </button>
+                    <button type="button" onclick="quickCloseShift()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1">
+                        <span>🔒 Kết Thúc Ca</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     </script>
 </body>
 </html>

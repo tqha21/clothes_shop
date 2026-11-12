@@ -96,7 +96,8 @@ class User extends Authenticatable
         if (!$this->isActive()) {
             return false;
         }
-        $roles = config("permissions.roles.$permission", []);
+        $matrix = config('permissions.roles', []);
+        $roles = $matrix[$permission] ?? [];
         $currentRole = ($this->role === 'employee') ? 'staff' : $this->role;
         return in_array($currentRole, $roles, true);
     }

@@ -95,7 +95,7 @@ Route::get('/auth/{provider}/callback', [\App\Http\Controllers\Auth\SocialLoginC
 // ==========================================
 // POS Routes (Bán hàng tại quầy)
 // ==========================================
-Route::middleware(['auth', 'can:pos.sell'])->prefix('pos')->name('pos.')->group(function () {
+Route::middleware(['auth'])->prefix('pos')->name('pos.')->group(function () {
     Route::get('/', [POSController::class, 'index'])->name('index');
     Route::get('/products', [POSController::class, 'products'])->name('products');
     Route::get('/barcode', [POSController::class, 'barcodeLookup'])->name('barcode');
@@ -105,7 +105,7 @@ Route::middleware(['auth', 'can:pos.sell'])->prefix('pos')->name('pos.')->group(
     Route::post('/sales', [POSSaleController::class, 'store'])->name('sales.store');
     Route::get('/sales/{order}', [POSSaleController::class, 'show'])->name('sales.show');
     Route::get('/sales/{order}/receipt', [POSSaleController::class, 'receipt'])->name('sales.receipt');
-    Route::post('/sales/{order}/refund', [POSSaleController::class, 'refund'])->name('sales.refund')->middleware('can:pos.refund');
+    Route::post('/sales/{order}/refund', [POSSaleController::class, 'refund'])->name('sales.refund');
 });
 
 // ==========================================

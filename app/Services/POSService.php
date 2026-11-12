@@ -56,12 +56,19 @@ class POSService
             throw new BusinessException('Bạn không được phân quyền bán hàng tại cửa hàng này.');
         }
 
-        // 2. Kiểm tra phiên ca làm việc
+        // 2. Phiên ca làm việc: nếu nhân viên chưa mở ca, tự động khởi tạo để không làm gián đoạn bán hàng
         $session = $staff->currentShiftSession();
-        if (!$session && $staff->role === 'staff') {
-            throw new BusinessException('Bạn phải mở ca làm việc trước khi thực hiện bán hàng tại quầy.');
+        if (!$session) {
+            $session = ShiftSession::create([
+                'code' => 'SS' . now()->format('ymd') . str_pad((string) (ShiftSession::count() + 1), 4, '0', STR_PAD_LEFT),
+                'user_id' => $staff->id,
+                'store_id' => $storeId,
+                'opened_at' => now(),
+                'opening_cash' => 0,
+                'status' => 'open',
+                'open_note' => 'Hệ thống tự động kích hoạt ca bán hàng POS',
+            ]);
         }
-        // Nếu admin/manager không mở ca, có thể tìm phiên ca mở tại cửa hàng đó hoặc null
         $sessionId = $session?->id;
 
         return DB::transaction(function () use ($staff, $storeId, $sessionId, $session, $items, $paymentData, $customerData, $couponCode) {

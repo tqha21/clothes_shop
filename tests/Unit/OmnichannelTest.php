@@ -117,3 +117,4 @@ class OmnichannelTest extends TestCase
         $this->assertEquals('SP00042', $p->sku);
     }
 }
+

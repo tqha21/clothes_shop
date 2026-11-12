@@ -101,10 +101,10 @@ class User extends Authenticatable
         return in_array($currentRole, $roles, true);
     }
 
-    /** Admin thấy toàn bộ cửa hàng; Manager/Staff chỉ cửa hàng được gán (BR-03) */
+    /** Admin hoặc người dùng chưa gán chi nhánh thấy toàn bộ cửa hàng; Manager/Staff có gán thì vào đúng chi nhánh */
     public function canAccessStore($storeId): bool
     {
-        if ($this->role === 'admin') {
+        if ($this->isAdmin() || $this->role === 'admin' || empty($this->store_id)) {
             return true;
         }
         return $storeId !== null && (int) $this->store_id === (int) $storeId;

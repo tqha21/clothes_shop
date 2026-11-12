@@ -1,0 +1,111 @@
+1
+00:00:05,552 --> 00:00:09,552
+[TRANG CHỦ] Chào mừng đến với hệ thống quản lý & bán hàng thời trang Clothes Shop.
+
+2
+00:00:11,451 --> 00:00:15,451
+[BỘ SƯU TẬP] Giao diện hiện đại với banner khuyến mãi, bộ sưu tập theo mùa và sản phẩm mới.
+
+3
+00:00:14,268 --> 00:00:18,268
+[SẢN PHẨM NỔI BẬT] Trưng bày đa dạng mặt hàng thời trang nam, nữ với đầy đủ thông tin giá và đánh giá.
+
+4
+00:00:22,856 --> 00:00:26,856
+[MUA SẮM ONLINE] Khách hàng có thể tìm kiếm, lọc theo danh mục và xem chi tiết sản phẩm.
+
+5
+00:00:26,917 --> 00:00:29,917
+[TÌM KIẾM] Tìm kiếm sản phẩm nhanh theo tên trên thanh công cụ.
+
+6
+00:00:29,434 --> 00:00:33,434
+[CHI TIẾT HÀNG HÓA] Xem chi tiết sản phẩm, chất liệu, màu sắc, kích thước và tồn kho khả dụng.
+
+7
+00:00:34,643 --> 00:00:38,643
+[CHỌN BIẾN THỂ] Lựa chọn kích cỡ, màu sắc phù hợp và thêm sản phẩm vào giỏ hàng trực tuyến.
+
+8
+00:00:38,370 --> 00:00:42,370
+[GIỎ HÀNG] Kiểm tra giỏ hàng, cập nhật số lượng, áp dụng mã voucher giảm giá.
+
+9
+00:00:44,923 --> 00:00:48,923
+[XÁC THỰC QUẢN TRỊ] Đăng nhập tài khoản quản trị hệ thống Clothes Shop an toàn & bảo mật.
+
+10
+00:00:54,452 --> 00:00:58,452
+[DASHBOARD QUẢN TRỊ] Trung tâm điều hành: tổng quan doanh số, đơn hàng, khách hàng và biến động kho.
+
+11
+00:01:01,318 --> 00:01:05,318
+[QUẢN LÝ DANH MỤC] Quản lý cây danh mục sản phẩm thời trang: áo, quần, váy, phụ kiện đa tầng.
+
+12
+00:01:05,036 --> 00:01:09,036
+[QUẢN LÝ SẢN PHẨM] Danh sách sản phẩm với giá bán, tồn kho tổng thể và trạng thái kinh doanh.
+
+13
+00:01:11,225 --> 00:01:15,225
+[KHO ĐA CỬA HÀNG] Theo dõi số lượng tồn kho theo thời gian thực trên toàn bộ 6 chi nhánh.
+
+14
+00:01:17,571 --> 00:01:21,571
+[NHẬT KÝ BIẾN ĐỘNG KHO] Ghi nhận chi tiết mọi giao dịch nhập kho, xuất kho, bán hàng và điều chuyển.
+
+15
+00:01:21,791 --> 00:01:25,791
+[QUẢN LÝ ĐƠN HÀNG] Đơn hàng được quản lý tập trung đa kênh với trạng thái xử lý rõ ràng.
+
+16
+00:01:26,826 --> 00:01:30,826
+[CHI TIẾT ĐƠN HÀNG] Xem thông tin khách hàng, địa chỉ nhận, danh sách sản phẩm và thanh toán.
+
+17
+00:01:31,145 --> 00:01:35,145
+[BÁN HÀNG POS] Giao diện thu ngân POS tối ưu hóa cho màn hình cảm ứng, quét mã vạch và phím tắt.
+
+18
+00:01:34,444 --> 00:01:38,444
+[CHỌN MẶT HÀNG] Bấm chọn sản phẩm hoặc quét mã vạch Barcode để thêm tức thì vào giỏ hóa đơn.
+
+19
+00:01:39,577 --> 00:01:43,077
+[KHÁCH HÀNG THÂN THIẾT] Nhập số điện thoại khách hàng để tích điểm thành viên và tự động chiết khấu VIP.
+
+20
+00:01:41,266 --> 00:01:44,266
+[TÍNH TIỀN THỐI] Máy tự động tính tiền thối lại khách hàng ngay khi thu ngân nhận tiền mặt.
+
+21
+00:01:42,293 --> 00:01:46,293
+[HOÀN TẤT ĐƠN HÀNG] Thanh toán thành công: hệ thống tự động trừ tồn kho chi nhánh và sẵn sàng in hóa đơn nhiệt K80.
+
+22
+00:01:45,305 --> 00:01:49,305
+[QUẢN LÝ NHÂN SỰ] Hệ thống quản lý hồ sơ nhân viên, chức vụ, chi nhánh và phân quyền bảo mật.
+
+23
+00:01:50,772 --> 00:01:54,772
+[XẾP LỊCH CA TUẦN] Giao diện trực quan xếp ca làm việc sáng - chiều - tối theo tuần cho từng chi nhánh.
+
+24
+00:01:59,853 --> 00:02:03,853
+[CHẤM CÔNG & ĐỐI SOÁT TIỀN] Nhân viên theo dõi ca làm việc, chấm công và đối soát tiền bàn giao minh bạch.
+
+25
+00:02:04,818 --> 00:02:08,818
+[BÁO CÁO DOANH SỐ] Báo cáo doanh số đa kênh: thống kê doanh thu thuần, số lượng đơn hàng và giá trị trung bình.
+
+26
+00:02:09,546 --> 00:02:13,546
+[TỶ TRỌNG ONLINE & POS] Biểu đồ so sánh trực quan tỷ trọng doanh thu giữa kênh Online và bán tại quầy POS.
+
+27
+00:02:12,528 --> 00:02:16,528
+[XẾP HẠNG DOANH SỐ] Theo dõi năng suất bán hàng theo từng nhân viên và từng cửa hàng trong hệ thống.
+
+28
+00:02:17,265 --> 00:02:22,265
+[TỔNG KẾT HỆ THỐNG] Clothes Shop – Giải pháp bán hàng và quản trị thời trang Omnichannel toàn diện, ổn định & hiện đại.

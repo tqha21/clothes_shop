@@ -27,16 +27,23 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        // Đăng ký mỗi quyền trong ma trận thành một Gate: can:pos.sell, can:inventory.adjust ...
+        // 1. Admin luôn có mọi quyền trên toàn hệ thống
+        Gate::before(function (User $user, string $ability) {
+            if ($user->role === 'admin') {
+                return true;
+            }
+        });
+
+        // 2. Đăng ký mỗi quyền trong ma trận thành một Gate
         foreach (array_keys(config('permissions.roles', [])) as $permission) {
             Gate::define($permission, function (User $user) use ($permission) {
                 return $user->hasPermission($permission);
             });
         }
 
-        // Quyền thao tác trên một cửa hàng cụ thể (BR-03)
+        // 3. Quyền thao tác trên một cửa hàng cụ thể (BR-03)
         Gate::define('store.access', function (User $user, $storeId) {
-            return $user->isActive() && $user->isEmployee() && $user->canAccessStore($storeId);
+            return $user->isAdmin() || ($user->isActive() && $user->isEmployee() && $user->canAccessStore($storeId));
         });
     }
 }

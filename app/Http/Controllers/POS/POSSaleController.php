@@ -135,3 +135,4 @@ class POSSaleController extends Controller
         }
     }
 }
+

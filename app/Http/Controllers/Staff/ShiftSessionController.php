@@ -238,3 +238,4 @@ class ShiftSessionController extends Controller
         return back();
     }
 }
+

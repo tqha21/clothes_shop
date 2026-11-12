@@ -78,23 +78,27 @@ class User extends Authenticatable
         return in_array($this->role, ['admin', 'manager', 'staff']);
     }
 
-    /** Tài khoản đang hoạt động */
+    /** Tài khoản đang hoạt động (nếu status null/empty mặc định active) */
     public function isActive(): bool
     {
-        return ($this->status ?? 'active') === 'active';
+        return empty($this->status) || $this->status === 'active';
     }
 
     /**
      * Kiểm tra quyền nghiệp vụ theo ma trận config/permissions.php.
-     * Tài khoản bị vô hiệu hóa không có bất kỳ quyền nào.
+     * Admin luôn có toàn quyền.
      */
     public function hasPermission(string $permission): bool
     {
+        if ($this->isAdmin() || $this->role === 'admin') {
+            return true;
+        }
         if (!$this->isActive()) {
             return false;
         }
         $roles = config("permissions.roles.$permission", []);
-        return in_array($this->role, $roles, true);
+        $currentRole = ($this->role === 'employee') ? 'staff' : $this->role;
+        return in_array($currentRole, $roles, true);
     }
 
     /** Admin thấy toàn bộ cửa hàng; Manager/Staff chỉ cửa hàng được gán (BR-03) */

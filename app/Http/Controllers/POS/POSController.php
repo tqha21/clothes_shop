@@ -180,3 +180,4 @@ class POSController extends Controller
         ]);
     }
 }
+

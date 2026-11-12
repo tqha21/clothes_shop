@@ -126,10 +126,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Reports: Omnichannel Sales & Staff Performance
-    Route::middleware('can:report.store')->group(function () {
-        Route::get('reports/sales', [SalesReportController::class, 'index'])->name('reports.sales');
-        Route::get('reports/sales/export', [SalesReportController::class, 'exportCsv'])->name('reports.sales.export');
-    });
+    Route::get('reports/sales', [SalesReportController::class, 'index'])->name('reports.sales');
+    Route::get('reports/sales/export', [SalesReportController::class, 'exportCsv'])->name('reports.sales.export');
 
     // Category Management
     Route::resource('categories', AdminCategoryController::class);

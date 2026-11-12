@@ -45,7 +45,7 @@
             <!-- Shift Status Badge -->
             <div id="shiftBadgeContainer">
                 @if($activeSession)
-                    <button type="button" onclick="openShiftDetailModal('{{ $activeSession->code }}', '{{ number_format($activeSession->opening_cash) }}đ', '{{ $activeSession->opened_at->format('H:i d/m/Y') }}', {{ $activeSession->id }})" id="shiftStatusBadge" class="flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-500/25 transition cursor-pointer" title="Bấm để xem chi tiết ca / kết ca">
+                    <button type="button" onclick="openShiftDetailModal()" id="shiftStatusBadge" class="flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-500/25 transition cursor-pointer" title="Bấm để xem chi tiết ca / kết ca">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                         <span id="shiftBadgeText">Ca mở: {{ $activeSession->code }} (Đầu ca: {{ number_format($activeSession->opening_cash) }}đ)</span>
                     </button>
@@ -807,13 +807,16 @@
         // ==========================================
         // Shift Management Modals for POS
         // ==========================================
-        let currentActiveSession = @json($activeSession ? [
-            'id' => $activeSession->id,
-            'code' => $activeSession->code,
-            'opening_cash' => $activeSession->opening_cash,
-            'opening_cash_formatted' => number_format($activeSession->opening_cash) . 'đ',
-            'opened_at' => $activeSession->opened_at->format('H:i d/m/Y'),
-        ] : null);
+        @php
+            $sessionPayload = $activeSession ? [
+                'id' => $activeSession->id,
+                'code' => $activeSession->code,
+                'opening_cash' => (float) $activeSession->opening_cash,
+                'opening_cash_formatted' => number_format($activeSession->opening_cash) . 'đ',
+                'opened_at' => $activeSession->opened_at ? $activeSession->opened_at->format('H:i d/m/Y') : '',
+            ] : null;
+        @endphp
+        let currentActiveSession = {!! json_encode($sessionPayload) !!};
 
         function openOpenShiftModal() {
             document.getElementById('openShiftModal').classList.remove('hidden');

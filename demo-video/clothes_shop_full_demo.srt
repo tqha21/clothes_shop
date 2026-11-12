@@ -1,0 +1,87 @@
+1
+00:00:01,710 --> 00:00:05,710
+Đầu tiên, khách hàng truy cập website và khám phá các sản phẩm thời trang.
+
+2
+00:00:13,272 --> 00:00:17,272
+Khách hàng lựa chọn danh mục để tìm kiếm sản phẩm phù hợp.
+
+3
+00:00:24,301 --> 00:00:28,801
+Khách hàng xem thông tin chi tiết và lựa chọn kích thước, màu sắc của sản phẩm.
+
+4
+00:00:33,494 --> 00:00:37,494
+Sản phẩm được thêm vào giỏ hàng để chuẩn bị tiến hành đặt mua.
+
+5
+00:00:37,634 --> 00:00:41,634
+Khách hàng đăng nhập tài khoản để tiếp tục quá trình thanh toán.
+
+6
+00:00:48,362 --> 00:00:52,862
+Khách hàng cung cấp thông tin người nhận và địa chỉ giao hàng.
+
+7
+00:00:56,518 --> 00:01:01,018
+Khách hàng xác nhận thông tin và hoàn tất đặt hàng thành công.
+
+8
+00:01:00,987 --> 00:01:04,987
+Khách hàng có thể theo dõi đơn hàng trong lịch sử mua sắm.
+
+9
+00:01:07,233 --> 00:01:11,233
+Tiếp theo, chúng ta chuyển sang hệ thống quản trị cửa hàng.
+
+10
+00:01:14,758 --> 00:01:18,758
+Quản trị viên đăng nhập để theo dõi và quản lý toàn bộ hoạt động kinh doanh.
+
+11
+00:01:21,710 --> 00:01:25,710
+Dashboard giúp quản trị viên theo dõi tổng quan hoạt động kinh doanh.
+
+12
+00:01:27,119 --> 00:01:31,119
+Chức năng POS hỗ trợ nhân viên thực hiện giao dịch trực tiếp tại quầy.
+
+13
+00:01:37,673 --> 00:01:41,673
+Hệ thống cung cấp báo cáo doanh thu và các chỉ số kinh doanh.
+
+14
+00:01:47,154 --> 00:01:51,154
+Quản trị viên tổ chức và quản lý các danh mục sản phẩm.
+
+15
+00:01:50,891 --> 00:01:54,891
+Hệ thống hỗ trợ quản lý sản phẩm và các biến thể thời trang.
+
+16
+00:01:58,387 --> 00:02:02,387
+Quản trị viên kiểm soát tồn kho và các hoạt động nhập xuất hàng hóa.
+
+17
+00:02:11,376 --> 00:02:15,876
+Đơn hàng của khách hàng được tiếp nhận và xử lý tại trang quản trị.
+
+18
+00:02:27,302 --> 00:02:31,302
+Hệ thống hỗ trợ quản lý nhân viên và phân quyền hoạt động.
+
+19
+00:02:32,062 --> 00:02:36,062
+Quản trị viên theo dõi lịch làm việc và phân công ca cho nhân viên.
+
+20
+00:02:45,973 --> 00:02:49,973
+Quản trị viên theo dõi thông tin và hoạt động mua sắm của khách hàng.
+
+21
+00:02:50,410 --> 00:02:54,410
+Quản trị viên theo dõi mã khuyến mãi Voucher và các sản phẩm được quan tâm.
+
+22
+00:03:03,495 --> 00:03:06,995
+CLOTHES SHOP - Hệ thống quản lý và bán hàng thời trang

@@ -19,6 +19,10 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
 use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
 use App\Http\Controllers\Admin\WishlistController as AdminWishlistController;
+use App\Http\Controllers\Admin\SalesReportController;
+use App\Http\Controllers\POS\POSController;
+use App\Http\Controllers\POS\POSSaleController;
+use App\Http\Controllers\Staff\ShiftSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,7 +53,6 @@ Route::post('/gio-hang/them', [CartController::class, 'add'])->name('cart.add');
 Route::post('/gio-hang/cap-nhat', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/gio-hang/xoa/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
-
 // Checkout Routes (Require Authentication)
 Route::middleware('auth')->group(function () {
     Route::get('/thanh-toan', [CheckoutController::class, 'index'])->name('checkout.index');
@@ -60,7 +63,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/tai-khoan/don-hang/{order}', [CustomerOrderController::class, 'show'])->name('customer.orders.show');
     Route::get('/don-hang/{order}/in-hoa-don', [CustomerOrderController::class, 'printInvoice'])->name('orders.invoice.print');
 });
-
 
 // Voucher/Coupon Wallet Routes (Protected)
 Route::middleware('auth')->group(function () {
@@ -74,11 +76,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/yeu-thich/xoa/{product}', [WishlistController::class, 'remove'])->name('wishlist.remove');
 });
 
-
 // Authentication Routes
 Auth::routes(['reset' => false]);
 
-// Quên mật khẩu & Đặt lại mật khẩu bằng mã xác nhận OTP (Gmail)
+// Quên mật khẩu & Đặt lại mật khẩu bằng mã OTP
 Route::get('/password/reset', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showForgotForm'])->name('password.request');
 Route::post('/password/email', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendOtp'])->name('password.email');
 Route::get('/password/verify-code', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showVerifyCodeForm'])->name('password.reset.code');
@@ -91,28 +92,63 @@ Route::post('/password/resend-otp', [\App\Http\Controllers\Auth\ForgotPasswordCo
 Route::get('/auth/{provider}/redirect', [\App\Http\Controllers\Auth\SocialLoginController::class, 'redirect'])->name('social.redirect');
 Route::get('/auth/{provider}/callback', [\App\Http\Controllers\Auth\SocialLoginController::class, 'callback'])->name('social.callback');
 
+// ==========================================
+// POS Routes (Bán hàng tại quầy)
+// ==========================================
+Route::middleware(['auth', 'can:pos.sell'])->prefix('pos')->name('pos.')->group(function () {
+    Route::get('/', [POSController::class, 'index'])->name('index');
+    Route::get('/products', [POSController::class, 'products'])->name('products');
+    Route::get('/barcode', [POSController::class, 'barcodeLookup'])->name('barcode');
+    Route::get('/customer-search', [POSController::class, 'searchCustomer'])->name('customer.search');
+    
+    // Giao dịch bán hàng & In hóa đơn
+    Route::post('/sales', [POSSaleController::class, 'store'])->name('sales.store');
+    Route::get('/sales/{order}', [POSSaleController::class, 'show'])->name('sales.show');
+    Route::get('/sales/{order}/receipt', [POSSaleController::class, 'receipt'])->name('sales.receipt');
+    Route::post('/sales/{order}/refund', [POSSaleController::class, 'refund'])->name('sales.refund')->middleware('can:pos.refund');
+});
+
+// ==========================================
+// Staff Shift & Attendance Routes (Mở/đóng ca & Chấm công)
+// ==========================================
+Route::middleware(['auth', 'can:shift.view'])->prefix('staff/shifts')->name('staff.shifts.')->group(function () {
+    Route::get('/', [ShiftSessionController::class, 'index'])->name('index');
+    Route::post('/open', [ShiftSessionController::class, 'open'])->name('open');
+    Route::post('/{session}/close', [ShiftSessionController::class, 'close'])->name('close');
+    Route::post('/{session}/cash-movement', [ShiftSessionController::class, 'cashMovement'])->name('cash-movement');
+    Route::post('/attendance', [ShiftSessionController::class, 'attendance'])->name('attendance');
+});
+
+// ==========================================
 // Admin Routes (Protected by auth and admin middleware)
+// ==========================================
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
+    // Reports: Omnichannel Sales & Staff Performance
+    Route::middleware('can:report.store')->group(function () {
+        Route::get('reports/sales', [SalesReportController::class, 'index'])->name('reports.sales');
+        Route::get('reports/sales/export', [SalesReportController::class, 'exportCsv'])->name('reports.sales.export');
+    });
+
     // Category Management
     Route::resource('categories', AdminCategoryController::class);
-    
+
     // Product Management
     Route::post('products/{product}/quick-edit', [AdminProductController::class, 'quickEdit'])->name('products.quick-edit');
     Route::resource('products', AdminProductController::class);
-    
+
     // Order Management
     Route::get('orders/export', [AdminOrderController::class, 'exportCsv'])->name('orders.export');
     Route::get('orders/{order}/print', [AdminOrderController::class, 'print'])->name('orders.print');
     Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update']);
-    
+
     // Employee Management
     Route::resource('employees', App\Http\Controllers\Admin\EmployeeController::class);
-    
-    // Shift (Ca l?m vi?c) Management
+
+    // Shift (Ca làm việc) Management
     Route::resource('shifts', App\Http\Controllers\Admin\ShiftController::class)->except(['show']);
-    
+
     // Shift Schedule (Lịch xếp ca) Management
     Route::get('schedules', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'index'])->name('schedules.index');
     Route::post('schedules', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'store'])->name('schedules.store');
@@ -124,14 +160,15 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('schedules/print', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'print'])->name('schedules.print');
     Route::put('schedules/{schedule}', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'update'])->name('schedules.update');
     Route::delete('schedules/{schedule}', [App\Http\Controllers\Admin\ShiftScheduleController::class, 'destroy'])->name('schedules.destroy');
-    
+
     // Customer Management
     Route::resource('customers', App\Http\Controllers\Admin\CustomerController::class);
 
-    // Inventory Management
+    // Inventory Management (Multi-store & transfers)
     Route::get('inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
     Route::get('inventory/history', [AdminInventoryController::class, 'history'])->name('inventory.history');
     Route::post('inventory/update', [AdminInventoryController::class, 'update'])->name('inventory.update');
+    Route::post('inventory/transfer', [AdminInventoryController::class, 'transfer'])->name('inventory.transfer');
 
     // Voucher (Coupon) Management
     Route::get('vouchers', [AdminVoucherController::class, 'index'])->name('vouchers.index');

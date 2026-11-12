@@ -78,6 +78,58 @@ class User extends Authenticatable
         return in_array($this->role, ['admin', 'manager', 'staff']);
     }
 
+    /** Tài khoản đang hoạt động */
+    public function isActive(): bool
+    {
+        return ($this->status ?? 'active') === 'active';
+    }
+
+    /**
+     * Kiểm tra quyền nghiệp vụ theo ma trận config/permissions.php.
+     * Tài khoản bị vô hiệu hóa không có bất kỳ quyền nào.
+     */
+    public function hasPermission(string $permission): bool
+    {
+        if (!$this->isActive()) {
+            return false;
+        }
+        $roles = config("permissions.roles.$permission", []);
+        return in_array($this->role, $roles, true);
+    }
+
+    /** Admin thấy toàn bộ cửa hàng; Manager/Staff chỉ cửa hàng được gán (BR-03) */
+    public function canAccessStore($storeId): bool
+    {
+        if ($this->role === 'admin') {
+            return true;
+        }
+        return $storeId !== null && (int) $this->store_id === (int) $storeId;
+    }
+
+    /** Danh sách store_id trong phạm vi quản lý (null = tất cả) */
+    public function accessibleStoreIds(): ?array
+    {
+        if ($this->role === 'admin') {
+            return null;
+        }
+        return $this->store_id ? [(int) $this->store_id] : [];
+    }
+
+    public function shiftSessions()
+    {
+        return $this->hasMany(ShiftSession::class);
+    }
+
+    public function currentShiftSession(): ?ShiftSession
+    {
+        return $this->shiftSessions()->where('status', 'open')->latest('opened_at')->first();
+    }
+
+    public function posOrders()
+    {
+        return $this->hasMany(Order::class, 'staff_id');
+    }
+
     /**
      * Scope a query to only include employees.
      */

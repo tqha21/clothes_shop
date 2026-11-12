@@ -10,6 +10,7 @@ class Store extends Model
     use HasFactory;
 
     protected $fillable = [
+        'code',
         'name',
         'address',
         'city',
@@ -19,8 +20,35 @@ class Store extends Model
         'longitude',
         'opening_hours',
         'status',
+        'is_default_warehouse',
         'image_url'
     ];
+
+    protected $casts = [
+        'is_default_warehouse' => 'boolean',
+    ];
+
+    public function stocks()
+    {
+        return $this->hasMany(StoreStock::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function shiftSessions()
+    {
+        return $this->hasMany(ShiftSession::class);
+    }
+
+    /** Kho mặc định (nhận tồn cũ, ưu tiên xuất đơn online) */
+    public static function defaultWarehouse(): ?self
+    {
+        return static::where('is_default_warehouse', true)->orderBy('id')->first()
+            ?? static::where('status', 'active')->orderBy('id')->first();
+    }
 
     /**
      * Scope to filter stores by search term

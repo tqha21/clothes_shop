@@ -19,6 +19,14 @@ class AdminMiddleware
         if (!auth()->check() || !in_array(auth()->user()->role, ['admin', 'manager', 'staff'])) {
             return redirect('/')->with('error', 'Bạn không có quyền truy cập trang này.');
         }
+
+        // Tài khoản nhân viên bị vô hiệu hóa: đăng xuất ngay
+        if (!auth()->user()->isActive()) {
+            auth()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->with('error', 'Tài khoản của bạn đã bị vô hiệu hóa.');
+        }
         
         return $next($request);
     }

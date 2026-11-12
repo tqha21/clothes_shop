@@ -50,9 +50,11 @@ class ProductController extends Controller
         
         if ($request->has('price')) $product->price = $request->price;
         if ($request->has('sale_price')) $product->sale_price = $request->sale_price;
-        if ($request->has('stock')) $product->stock = $request->stock;
-        
         $product->save();
+
+        if ($request->has('stock')) {
+            app(\App\Services\StockService::class)->reconcileProductTotal($product->id, (int) $request->stock, auth()->id(), 'Sửa nhanh tồn kho sản phẩm');
+        }
         
         return response()->json(['success' => true, 'message' => 'Cập nhật thành công!']);
     }
@@ -111,7 +113,8 @@ class ProductController extends Controller
             $data['colors'] = array_slice($data['colors'], 0, $totalImgs);
         }
 
-        Product::create($data);
+        $product = Product::create($data);
+        app(\App\Services\StockService::class)->reconcileProductTotal($product->id, (int) $product->stock, auth()->id(), 'Tạo sản phẩm mới');
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Sản phẩm đã được tạo thành công! (Màu: ' . count($data['colors']) . ', Ảnh: ' . $totalImgs . ')');
@@ -175,7 +178,9 @@ class ProductController extends Controller
             $data['colors'] = array_slice($data['colors'], 0, $totalImgs);
         }
 
+        $targetStock = (int) $data['stock'];
         $product->update($data);
+        app(\App\Services\StockService::class)->reconcileProductTotal($product->id, $targetStock, auth()->id(), 'Cập nhật thông tin sản phẩm');
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Sản phẩm đã được cập nhật thành công! (Màu: ' . count($data['colors']) . ', Ảnh: ' . $totalImgs . ')');

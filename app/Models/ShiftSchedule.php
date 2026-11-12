@@ -18,6 +18,8 @@ class ShiftSchedule extends Model
         'work_date',
         'note',
         'status',
+        'check_in_at',
+        'check_out_at',
     ];
 
     /**
@@ -25,7 +27,24 @@ class ShiftSchedule extends Model
      */
     protected $casts = [
         'work_date' => 'date',
+        'check_in_at' => 'datetime',
+        'check_out_at' => 'datetime',
     ];
+
+    /** Phiên làm việc thực tế gắn với lịch này */
+    public function sessions()
+    {
+        return $this->hasMany(ShiftSession::class, 'shift_schedule_id');
+    }
+
+    /** Số phút làm việc thực tế theo chấm công */
+    public function getWorkedMinutesAttribute(): ?int
+    {
+        if (!$this->check_in_at || !$this->check_out_at) {
+            return null;
+        }
+        return (int) $this->check_in_at->diffInMinutes($this->check_out_at);
+    }
 
     /**
      * Status labels in Vietnamese.

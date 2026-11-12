@@ -32,6 +32,25 @@ class Product extends Model
         return $this->hasMany(InventoryLog::class);
     }
 
+    public function storeStocks()
+    {
+        return $this->hasMany(StoreStock::class);
+    }
+
+    /** Giá bán hiện hành (ưu tiên giá khuyến mãi hợp lệ) */
+    public function getEffectivePriceAttribute(): float
+    {
+        $sale = (float) $this->sale_price;
+        $price = (float) $this->price;
+        return ($sale > 0 && $sale < $price) ? $sale : $price;
+    }
+
+    /** Mã SKU hiển thị (hệ thống chưa có cột SKU riêng) */
+    public function getSkuAttribute(): string
+    {
+        return 'SP' . str_pad($this->id, 5, '0', STR_PAD_LEFT);
+    }
+
 
     /**
      * Scope for popular products (most viewed).

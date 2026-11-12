@@ -2,20 +2,30 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
-use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\ActivityLog;
+use App\Models\Order;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
+    public function __construct(protected OrderService $orderService)
+    {
+    }
+
     public function index(Request $request)
     {
-        $query = Order::with('user')->latest();
+        $query = Order::with(['user', 'store', 'staff'])->latest();
 
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
+        }
+
+        if ($request->has('channel') && $request->channel != '') {
+            $query->where('channel', $request->channel);
         }
 
         $orders = $query->paginate(20);
@@ -24,10 +34,14 @@ class OrderController extends Controller
 
     public function exportCsv(Request $request)
     {
-        $query = Order::with('user')->latest();
+        $query = Order::with(['user', 'store', 'staff'])->latest();
 
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
+        }
+
+        if ($request->has('channel') && $request->channel != '') {
+            $query->where('channel', $request->channel);
         }
 
         $orders = $query->get();
@@ -41,7 +55,7 @@ class OrderController extends Controller
             "Expires"             => "0"
         );
 
-        $columns = ['Ma DH', 'Khach Hang', 'Email', 'So Dien Thoai', 'Dia Chi', 'Tong Tien', 'Trang Thai', 'Phuong Thuc TT', 'Ngay Dat'];
+        $columns = ['Ma DH', 'Kenh', 'Cua Hang', 'Khach Hang', 'So Dien Thoai', 'Dia Chi', 'Tong Tien', 'Trang Thai', 'Phuong Thuc TT', 'Ngay Dat'];
 
         $callback = function() use($orders, $columns) {
             $file = fopen('php://output', 'w');
@@ -50,17 +64,18 @@ class OrderController extends Controller
             fputcsv($file, $columns);
 
             foreach ($orders as $order) {
-                $row['Ma DH']  = $order->id;
-                $row['Khach Hang'] = $order->customer_name;
-                $row['Email'] = $order->customer_email;
-                $row['So Dien Thoai'] = $order->customer_phone;
-                $row['Dia Chi'] = $order->customer_address;
-                $row['Tong Tien'] = $order->total;
-                $row['Trang Thai'] = $order->status;
-                $row['Phuong Thuc TT'] = $order->payment_method;
-                $row['Ngay Dat'] = $order->created_at->format('Y-m-d H:i:s');
-
-                fputcsv($file, array($row['Ma DH'], $row['Khach Hang'], $row['Email'], $row['So Dien Thoai'], $row['Dia Chi'], $row['Tong Tien'], $row['Trang Thai'], $row['Phuong Thuc TT'], $row['Ngay Dat']));
+                fputcsv($file, [
+                    $order->display_code,
+                    strtoupper($order->channel),
+                    $order->store->name ?? 'Online',
+                    $order->customer_name,
+                    $order->customer_phone,
+                    $order->customer_address,
+                    $order->total,
+                    $order->status_label,
+                    $order->payment_method,
+                    $order->created_at->format('Y-m-d H:i:s'),
+                ]);
             }
             fclose($file);
         };
@@ -70,7 +85,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load('user', 'items.product');
+        $order->load(['user', 'items.product', 'store', 'staff', 'payments', 'shiftSession']);
         $histories = ActivityLog::where('subject_type', get_class($order))
                                 ->where('subject_id', $order->id)
                                 ->latest()
@@ -84,32 +99,22 @@ class OrderController extends Controller
             'status' => 'required|in:pending,shipping,completed,cancelled',
         ]);
 
-        // If order is cancelled, we need to restore stock and decrement sold_count
-        if ($request->status === 'cancelled' && $order->status !== 'cancelled') {
-            foreach ($order->items as $item) {
-                if ($item->product) {
-                    $item->product->increment('stock', $item->quantity);
-                    $item->product->decrement('sold_count', $item->quantity);
-                }
-            }
+        try {
+            $this->orderService->updateStatus($order, $request->status, Auth::user());
+
+            return redirect()->route('admin.orders.show', $order)
+                ->with('success', 'Trạng thái đơn hàng đã được cập nhật thành công!');
+        } catch (BusinessException $e) {
+            return redirect()->route('admin.orders.show', $order)->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            report($e);
+            return redirect()->route('admin.orders.show', $order)->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
-
-        $order->update(['status' => $request->status]);
-
-        ActivityLog::create([
-            'description' => "Cập nhật trạng thái đơn hàng thành: " . $request->status,
-            'causer_id' => auth()->id(),
-            'subject_type' => get_class($order),
-            'subject_id' => $order->id,
-        ]);
-
-        return redirect()->route('admin.orders.show', $order)
-            ->with('success', 'Trạng thái đơn hàng đã được cập nhật!');
     }
 
     public function print(Order $order)
     {
-        $order->load(['user', 'items.product']);
+        $order->load(['user', 'items.product', 'store', 'staff', 'payments']);
         return view('orders.invoice', compact('order'));
     }
 }
